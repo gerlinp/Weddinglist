@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Jost:wght@400;500;600;700&family=Playfair+Display:wght@600;700&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; }
+    * { box-sizing: border-box; }
+    ::selection { background: oklch(80% 0.1 45 / 0.35); }
+    input::placeholder, textarea::placeholder { color: oklch(65% 0.02 85); }
+    input, select, textarea, button { font-family: 'Jost', sans-serif; }
+  </style>
+</helmet>
+
+<div onClick="{{ closeAllMenus }}" style="min-height:100vh; position:relative; padding-left:{{ spineWidth }}px; background:linear-gradient(to right, transparent 0 95px, oklch(62% 0.16 25 / 0.4) 95px 97px, transparent 97px 100%), repeating-linear-gradient(to bottom, transparent 0px 31px, {{ theme.ruleColor }} 31px 32px), {{ theme.pageBg }}; color:oklch(24% 0.015 80); font-family:'Jost', sans-serif;">
+
+  <!-- SPIRAL BINDING SPINE -->
+  <div style="position:fixed; top:0; left:0; bottom:0; width:{{ spineWidth }}px; background:{{ theme.spineBg }}; box-shadow:2px 0 10px oklch(30% 0.02 80 / 0.18), inset -1px 0 0 oklch(85% 0.02 85); background-image:radial-gradient(circle, {{ theme.holeColor }} 0 5px, transparent 5.5px); background-size:100% 46px; background-position:0 22px; background-repeat:repeat-y; pointer-events:none;"></div>
+
+  <!-- MOBILE TOP BAR -->
+  <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width:1400px; margin:0 auto; padding:16px 18px 0; display:flex; align-items:center; gap:10px;">
+      <button onClick="{{ toggleMobileMenu }}" style="background:{{ accent1 }}; color:oklch(98% 0.005 80); border:none; width:42px; height:42px; border-radius:10px; font-size:18px; cursor:pointer; box-shadow:0 2px 5px oklch(30% 0.02 80 / 0.2);">☰</button>
+      <span style="font-family:{{ headingFont }}; font-size:22px; font-weight:700; flex:1;">Menu</span>
+      <button onClick="{{ toggleFiltersPanel }}" style="background:{{ filtersButtonBg }}; color:{{ filtersButtonColor }}; border:1.5px solid oklch(70% 0.18 264); padding:9px 14px; border-radius:10px; font-size:13px; font-weight:600; cursor:pointer;">Filters{{ filtersBadgeText }}</button>
+    </div>
+  </sc-if>
+
+  <!-- MOBILE SLIDE-DOWN MENU -->
+  <sc-if value="{{ showMobileMenu }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ toggleMobileMenu }}" style="position:fixed; inset:0; background:oklch(20% 0.01 80 / 0.5); z-index:200; display:flex; align-items:flex-start; justify-content:center; padding:0;">
+      <div onClick="{{ stopProp }}" style="background:{{ theme.cardBg }}; width:100%; max-width:420px; height:100%; overflow-y:auto; padding:20px; box-shadow:4px 0 24px oklch(20% 0.02 80 / 0.3); display:flex; flex-direction:column; gap:12px;">
+        <div style="display:flex; align-items:center; margin-bottom:6px;">
+          <span style="font-family:{{ headingFont }}; font-size:26px; font-weight:700; flex:1;">Menu</span>
+          <button onClick="{{ toggleMobileMenu }}" style="background:transparent; border:none; font-size:22px; cursor:pointer; color:oklch(40% 0.02 85);">×</button>
+        </div>
+        <button onClick="{{ openAddModal }}" style="background:{{ accent1 }}; color:oklch(98% 0.005 80); border:none; padding:13px 18px; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer; text-align:left;">+ Add Guests</button>
+        <button onClick="{{ addStatus }}" style="background:oklch(98.5% 0.015 85); color:oklch(46% 0.2 45); border:2px solid oklch(70% 0.18 45); padding:11px 16px; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer; text-align:left;">+ New Group</button>
+        <button onClick="{{ openFamilyModal }}" style="background:oklch(98.5% 0.015 85); border:2px solid oklch(70% 0.18 45); color:oklch(46% 0.2 45); padding:11px 16px; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer; text-align:left;">+ Add Family</button>
+        <button onClick="{{ openNewTagModal }}" style="background:transparent; border:2px dashed oklch(70% 0.02 85); color:oklch(48% 0.02 85); padding:11px 16px; border-radius:10px; font-size:15px; cursor:pointer; text-align:left;">+ New Tag</button>
+
+        <sc-if value="{{ toolbarTags }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; flex-wrap:wrap; gap:8px; padding:4px 0;">
+            <sc-for list="{{ toolbarTags }}" as="t" hint-placeholder-count="2">
+              <button onClick="{{ t.onEdit }}" style="display:flex; align-items:center; background:{{ t.chipBg }}; border:1.5px solid {{ t.color }}; padding:6px 14px; border-radius:8px; font-size:14px; font-weight:700; color:oklch(22% 0.03 80); cursor:pointer;">{{ t.name }}</button>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <div style="height:2px; background:oklch(88% 0.02 85); margin:6px 0;"></div>
+
+        <button onClick="{{ exportJSON }}" style="background:transparent; border:1.5px solid oklch(78% 0.02 85); color:oklch(35% 0.02 85); padding:11px 16px; border-radius:10px; font-size:15px; cursor:pointer; text-align:left;">Export backup (.json)</button>
+        <button onClick="{{ exportCSV }}" style="background:transparent; border:1.5px solid oklch(78% 0.02 85); color:oklch(35% 0.02 85); padding:11px 16px; border-radius:10px; font-size:15px; cursor:pointer; text-align:left;">Export spreadsheet (.csv)</button>
+        <button onClick="{{ triggerImport }}" style="background:transparent; border:1.5px solid oklch(78% 0.02 85); color:oklch(35% 0.02 85); padding:11px 16px; border-radius:10px; font-size:15px; cursor:pointer; text-align:left;">Import backup</button>
+
+        <div style="height:2px; background:oklch(88% 0.02 85); margin:6px 0;"></div>
+        <span style="font-size:12px; text-transform:uppercase; letter-spacing:0.05em; color:oklch(48% 0.02 85);">Paper theme</span>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <sc-for list="{{ paperThemeSwatches }}" as="pt" hint-placeholder-count="4">
+            <button onClick="{{ pt.onClick }}" title="{{ pt.name }}" style="width:30px; height:30px; border-radius:50%; background:{{ pt.swatch }}; cursor:pointer; border:2px solid {{ pt.active }};"></button>
+          </sc-for>
+          <input type="color" value="{{ customPaperHex }}" onChange="{{ onCustomPaperColorChange }}" title="Custom paper color" style="width:30px; height:30px; border-radius:50%; border:2px dashed oklch(75% 0.02 85); padding:0; cursor:pointer; background:none;" />
+          <input type="text" defaultValue="{{ customPaperHex }}" onBlur="{{ onCustomPaperTextCommit }}" onKeyDown="{{ onCustomPaperTextKeyDown }}" placeholder="#hex" style="width:82px; padding:6px 8px; border-radius:6px; border:1px solid oklch(82% 0.02 85); font-size:12px;" />
+        </div>
+        <span style="font-size:12px; text-transform:uppercase; letter-spacing:0.05em; color:oklch(48% 0.02 85); margin-top:10px; display:block;">Heading font</span>
+        <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
+          <sc-for list="{{ fontOptions }}" as="fo" hint-placeholder-count="3">
+            <button onClick="{{ fo.onClick }}" style="text-align:left; padding:8px 10px; border-radius:8px; border:1.5px solid {{ fo.border }}; background:{{ fo.bg }}; font-family:{{ fo.family }}; font-size:17px; cursor:pointer; color:oklch(28% 0.02 80);">{{ fo.label }}</button>
+          </sc-for>
+        </div>
+        <span style="font-size:12px; text-transform:uppercase; letter-spacing:0.05em; color:oklch(48% 0.02 85); margin-top:10px; display:block;">Accent colors</span>
+        <sc-for list="{{ accentColorGroups }}" as="ag" hint-placeholder-count="2">
+          <div style="display:flex; align-items:center; gap:10px; margin-top:6px;">
+            <input type="color" value="{{ ag.currentHex }}" onChange="{{ ag.onPick }}" style="width:26px; height:26px; border-radius:50%; border:1px solid oklch(85% 0.02 85); padding:0; cursor:pointer; background:none;" />
+            <input type="text" defaultValue="{{ ag.currentHex }}" onBlur="{{ ag.onTextCommit }}" onKeyDown="{{ ag.onTextKeyDown }}" placeholder="#hex" style="width:82px; padding:6px 8px; border-radius:6px; border:1px solid oklch(82% 0.02 85); font-size:12px;" />
+            <span style="font-size:12px; color:oklch(38% 0.02 85);">{{ ag.name }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- CUSTOMIZE PANEL (top right) -->
+  <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+    <div style="position:absolute; top:20px; right:{{ pagePad }}; z-index:30;">
+      <button onClick="{{ toggleCustomizePanel }}" style="display:flex; align-items:center; gap:7px; background:{{ theme.cardBg }}; border:1.5px solid oklch(78% 0.02 85); border-radius:20px; padding:8px 16px; font-size:13px; font-weight:600; color:oklch(35% 0.02 85); cursor:pointer; box-shadow:0 2px 6px oklch(30% 0.02 80 / 0.15);">
+        <span style="width:14px; height:14px; border-radius:50%; background:{{ theme.swatch }}; display:inline-block; border:1px solid oklch(70% 0.02 85);"></span>
+        Customize
+      </button>
+      <sc-if value="{{ showCustomizePanel }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ stopProp }}" style="position:absolute; top:110%; right:0; margin-top:8px; background:oklch(99% 0.01 85); border:1px solid oklch(85% 0.02 85); border-radius:12px; box-shadow:0 14px 34px oklch(20% 0.02 80 / 0.25); z-index:60; padding:16px; width:230px; display:flex; flex-direction:column; gap:16px;">
+          <div>
+            <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:oklch(48% 0.02 85);">Paper Theme</span>
+            <div style="display:flex; align-items:center; gap:10px; margin-top:8px;">
+              <sc-for list="{{ paperThemeSwatches }}" as="pt" hint-placeholder-count="4">
+                <button onClick="{{ pt.onClick }}" title="{{ pt.name }}" style="width:26px; height:26px; border-radius:50%; background:{{ pt.swatch }}; cursor:pointer; border:2px solid {{ pt.active }};"></button>
+              </sc-for>
+              <input type="color" value="{{ customPaperHex }}" onChange="{{ onCustomPaperColorChange }}" title="Custom paper color" style="width:26px; height:26px; border-radius:50%; border:2px dashed oklch(75% 0.02 85); padding:0; cursor:pointer; background:none;" />
+            </div>
+            <input type="text" defaultValue="{{ customPaperHex }}" onBlur="{{ onCustomPaperTextCommit }}" onKeyDown="{{ onCustomPaperTextKeyDown }}" placeholder="#hex" style="width:100%; margin-top:6px; padding:6px 8px; border-radius:6px; border:1px solid oklch(82% 0.02 85); font-size:12px; box-sizing:border-box;" />
+          </div>
+          <div>
+            <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:oklch(48% 0.02 85);">Heading Font</span>
+            <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
+              <sc-for list="{{ fontOptions }}" as="fo" hint-placeholder-count="3">
+                <button onClick="{{ fo.onClick }}" style="text-align:left; padding:8px 10px; border-radius:8px; border:1.5px solid {{ fo.border }}; background:{{ fo.bg }}; font-family:{{ fo.family }}; font-size:18px; cursor:pointer; color:oklch(28% 0.02 80);">{{ fo.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div>
+            <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:oklch(48% 0.02 85);">Accent Colors</span>
+            <sc-for list="{{ accentColorGroups }}" as="ag" hint-placeholder-count="2">
+              <div style="display:flex; align-items:center; gap:10px; margin-top:8px;">
+                <input type="color" value="{{ ag.currentHex }}" onChange="{{ ag.onPick }}" style="width:24px; height:24px; border-radius:50%; border:1px solid oklch(85% 0.02 85); padding:0; cursor:pointer; background:none;" />
+                <input type="text" defaultValue="{{ ag.currentHex }}" onBlur="{{ ag.onTextCommit }}" onKeyDown="{{ ag.onTextKeyDown }}" placeholder="#hex" style="width:76px; padding:5px 7px; border-radius:6px; border:1px solid oklch(82% 0.02 85); font-size:12px;" />
+                <span style="font-size:12px; color:oklch(38% 0.02 85);">{{ ag.name }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <!-- HEADER -->
+  <div style="padding:44px {{ pagePad }} 20px; max-width:1400px; margin:0 auto;">
+    <input value="{{ eventTitle }}" onChange="{{ onTitleChange }}" placeholder="Our Wedding Guest List" style="font-family:{{ headingFont }}; font-size:{{ titleFontSize }}; font-weight:700; color:oklch(22% 0.02 80); border:none; background:transparent; outline:none; width:100%; padding:0;" />
+    <div style="display:flex; gap:18px; flex-wrap:wrap; margin-top:2px;">
+      <input value="{{ eventNames }}" onChange="{{ onNamesChange }}" placeholder="Sarah &amp; James" style="font-size:16px; color:oklch(45% 0.02 85); border:none; background:transparent; outline:none; flex:1 1 200px; min-width:160px; padding:4px 0 0; font-style:italic;" />
+      <input value="{{ eventDate }}" onChange="{{ onDateChange }}" placeholder="October 10, 2026" style="font-size:16px; color:oklch(45% 0.02 85); border:none; background:transparent; outline:none; flex:1 1 160px; min-width:140px; padding:4px 0 0; font-style:italic; text-align:right;" />
+    </div>
+  </div>
+
+  <!-- HIS & HERS VIEW SWITCHER (diary tab index) -->
+  <div style="max-width:1400px; margin:0 auto; padding:0 {{ pagePad }}; display:flex; align-items:flex-end; flex-wrap:wrap; gap:6px; position:relative;">
+    <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:oklch(50% 0.02 85); margin-bottom:10px; margin-right:6px;">Viewing</span>
+    <sc-for list="{{ sideTabs }}" as="tab" hint-placeholder-count="2">
+      <div style="position:relative; cursor:pointer; display:flex; align-items:center; gap:6px; background:{{ tab.bg }}; opacity:{{ tab.opacity }}; border-radius:10px 10px 0 0; padding:8px 12px 10px 16px; box-shadow:0 -1px 4px oklch(30% 0.02 80 / 0.15); transform:translateY({{ tab.lift }});">
+        <input onClick="{{ tab.onSelect }}" value="{{ tab.name }}" onChange="{{ tab.onRename }}" style="border:none; background:transparent; outline:none; font-size:15px; font-weight:700; color:{{ tab.textColor }}; cursor:pointer; padding:2px 0; width:{{ tab.inputWidth }}px;" />
+        <button onClick="{{ tab.onToggleColorPicker }}" style="width:16px; height:16px; border-radius:50%; border:2px solid {{ tab.textColor }}; background:transparent; opacity:0.7; cursor:pointer; padding:0; flex-shrink:0;"></button>
+        <sc-if value="{{ tab.showColorPicker }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ stopProp }}" style="position:absolute; top:100%; left:0; margin-top:6px; background:oklch(99% 0.01 85); border:1px solid oklch(85% 0.02 85); border-radius:10px; box-shadow:0 10px 28px oklch(20% 0.02 80 / 0.2); z-index:60; padding:12px; display:flex; align-items:center; gap:10px;">
+            <input type="color" value="{{ tab.currentHex }}" onChange="{{ tab.onPickColor }}" style="width:36px; height:36px; border-radius:50%; border:1px solid oklch(85% 0.02 85); padding:0; cursor:pointer; background:none;" />
+            <input type="text" defaultValue="{{ tab.currentHex }}" onBlur="{{ tab.onTextCommit }}" onKeyDown="{{ tab.onTextKeyDown }}" placeholder="#hex" style="width:88px; padding:7px 8px; border-radius:6px; border:1px solid oklch(82% 0.02 85); font-size:13px;" />
+          </div>
+        </sc-if>
+      </div>
+    </sc-for>
+    <div onClick="{{ combinedTab.onSelect }}" style="cursor:pointer; background:{{ combinedTab.bg }}; color:{{ combinedTab.color }}; padding:8px 18px 10px; border-radius:10px 10px 0 0; font-size:15px; font-weight:700; box-shadow:0 -1px 4px oklch(30% 0.02 80 / 0.15);">Combined</div>
+    <div style="flex:1; height:2px; background:oklch(78% 0.03 85); align-self:flex-end; margin-bottom:0;"></div>
+  </div>
+
+  <!-- TOOLBAR (desktop) -->
+  <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+  <div style="background:{{ theme.toolbarBg }}; border-top:2px solid oklch(78% 0.03 85); border-bottom:1px solid oklch(85% 0.02 85);">
+    <div style="max-width:1400px; margin:0 auto; padding:16px 40px; display:flex; flex-wrap:wrap; align-items:center; gap:12px;">
+      <button onClick="{{ openAddModal }}" style="background:{{ accent1 }}; color:oklch(98% 0.005 80); border:none; padding:11px 20px; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; box-shadow:0 3px 0 oklch(34% 0.2 264), 0 4px 8px oklch(30% 0.1 264 / 0.3);">+ Add Guests</button>
+      <button onClick="{{ addStatus }}" style="background:oklch(98.5% 0.015 85); color:oklch(46% 0.2 45); border:2px solid oklch(70% 0.18 45); padding:9px 16px; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; box-shadow:0 2px 5px oklch(30% 0.02 80 / 0.1);">+ New Group</button>
+
+      <div style="width:2px; height:28px; background:oklch(82% 0.03 85); margin:0 4px;"></div>
+
+      <span style="font-size:13px; color:oklch(48% 0.02 85); letter-spacing:0.02em;">Family tags:</span>
+      <sc-for list="{{ toolbarTags }}" as="t" hint-placeholder-count="2">
+        <button onClick="{{ t.onEdit }}" style="display:flex; align-items:center; background:{{ t.chipBg }}; border:1.5px solid {{ t.color }}; padding:7px 18px; border-radius:8px; font-size:16px; font-weight:700; color:oklch(22% 0.03 80); cursor:pointer; transform:rotate({{ t.rotation }}deg); box-shadow:0 2px 5px oklch(30% 0.02 80 / 0.15);">
+          {{ t.name }}
+        </button>
+      </sc-for>
+      <button onClick="{{ openNewTagModal }}" style="background:transparent; border:2px dashed oklch(70% 0.02 85); color:oklch(48% 0.02 85); padding:6px 14px; border-radius:20px; font-size:13px; cursor:pointer;">+ New Tag</button>
+      <button onClick="{{ openFamilyModal }}" style="background:oklch(98.5% 0.015 85); border:2px solid oklch(70% 0.18 45); color:oklch(46% 0.2 45); padding:6px 14px; border-radius:20px; font-size:13px; font-weight:600; cursor:pointer; box-shadow:0 2px 5px oklch(30% 0.02 80 / 0.1);">+ Add Family</button>
+
+      <div style="width:2px; height:28px; background:oklch(82% 0.03 85); margin:0 4px;"></div>
+
+      <div style="position:relative;">
+        <button onClick="{{ toggleExportMenu }}" style="background:oklch(98.5% 0.015 85); color:oklch(35% 0.02 85); border:1.5px solid oklch(78% 0.02 85); padding:10px 16px; border-radius:10px; font-size:14px; cursor:pointer; box-shadow:0 2px 5px oklch(30% 0.02 80 / 0.1);">Export ▾</button>
+        <sc-if value="{{ ui.showExportMenu }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute; top:110%; left:0; background:oklch(99% 0.01 85); border:1px solid oklch(85% 0.02 85); border-radius:8px; box-shadow:0 10px 28px oklch(20% 0.02 80 / 0.2); z-index:50; min-width:210px; overflow:hidden;">
+            <button onClick="{{ exportJSON }}" style="display:block; width:100%; text-align:left; padding:11px 14px; background:transparent; border:none; font-size:14px; cursor:pointer; color:oklch(30% 0.02 80);">Backup (.json)</button>
+            <button onClick="{{ exportCSV }}" style="display:block; width:100%; text-align:left; padding:11px 14px; background:transparent; border:none; border-top:1px solid oklch(90% 0.02 85); font-size:14px; cursor:pointer; color:oklch(30% 0.02 80);">Spreadsheet (.csv)</button>
+          </div>
+        </sc-if>
+      </div>
+      <button onClick="{{ triggerImport }}" style="background:oklch(98.5% 0.015 85); color:oklch(35% 0.02 85); border:1.5px solid oklch(78% 0.02 85); padding:10px 16px; border-radius:10px; font-size:14px; cursor:pointer; box-shadow:0 2px 5px oklch(30% 0.02 80 / 0.1);">Import</button>
+      <input type="file" accept="application/json,.json" ref="{{ fileInputRef }}" onChange="{{ handleImportFile }}" style="display:none;" />
+
+      <div style="flex:1;"></div>
+
+      <button onClick="{{ toggleFiltersPanel }}" style="background:{{ filtersButtonBg }}; color:{{ filtersButtonColor }}; border:1.5px solid oklch(70% 0.18 264); padding:10px 16px; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; box-shadow:0 2px 5px oklch(30% 0.02 80 / 0.1);">Filters{{ filtersBadgeText }}</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- FILTERS PANEL -->
+  <sc-if value="{{ ui.showFilters }}" hint-placeholder-val="{{ false }}">
+    <div style="background:{{ theme.filterBg }}; border-bottom:1px solid oklch(85% 0.02 85);">
+      <div style="max-width:1400px; margin:0 auto; padding:18px 40px; display:flex; flex-direction:column; gap:14px;">
+
+        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:10px;">
+          <span style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(48% 0.02 85); width:90px;">Groups</span>
+          <sc-for list="{{ statusFilterChips }}" as="c" hint-placeholder-count="3">
+            <button onClick="{{ c.onToggle }}" style="display:flex; align-items:center; gap:6px; background:{{ c.bg }}; border:1px solid {{ c.color }}; padding:5px 12px; border-radius:20px; font-size:13px; color:oklch(28% 0.02 80); cursor:pointer; opacity:{{ c.opacity }};">
+              <span style="width:8px; height:8px; border-radius:50%; background:{{ c.color }}; display:inline-block;"></span>
+              {{ c.name }}
+            </button>
+          </sc-for>
+        </div>
+
+        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:10px;">
+          <span style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(48% 0.02 85); width:90px;">Families</span>
+          <sc-for list="{{ tagFilterChips }}" as="c" hint-placeholder-count="2">
+            <button onClick="{{ c.onToggle }}" style="display:flex; align-items:center; background:{{ c.bg }}; border:1.5px solid {{ c.color }}; padding:6px 16px; border-radius:8px; font-size:15px; font-weight:600; color:oklch(24% 0.03 80); cursor:pointer; opacity:{{ c.opacity }}; transform:rotate({{ c.rotation }}deg);">
+              {{ c.name }}
+            </button>
+          </sc-for>
+        </div>
+
+        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:10px;">
+          <span style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(48% 0.02 85); width:90px;">Isolate</span>
+          <button onClick="{{ toggleOnlyChildren }}" style="background:{{ childFilterBg }}; border:1.5px solid {{ accent2 }}; padding:5px 14px; border-radius:20px; font-size:13px; color:oklch(28% 0.02 80); cursor:pointer;">Children only</button>
+          <button onClick="{{ toggleOnlyMinors }}" style="background:{{ minorFilterBg }}; border:1.5px solid {{ accent1 }}; padding:5px 14px; border-radius:20px; font-size:13px; color:oklch(28% 0.02 80); cursor:pointer;">Under-21 only</button>
+          <div style="flex:1;"></div>
+          <button onClick="{{ resetFilters }}" style="background:transparent; border:none; color:oklch(45% 0.02 80); font-size:13px; text-decoration:underline; cursor:pointer;">Reset filters</button>
+        </div>
+
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- COUNTS BAR -->
+  <div style="max-width:1400px; margin:0 auto; padding:26px 40px 6px;">
+    <div style="display:flex; align-items:baseline; flex-wrap:wrap; gap:28px;">
+      <div>
+        <div style="font-family:{{ headingFont }}; font-size:44px; font-weight:700; line-height:1; color:{{ accent1 }};">{{ totalVisible }}</div>
+        <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 85); margin-top:4px;">Total guests {{ totalSubText }}</div>
+      </div>
+      <div style="width:2px; height:40px; background:oklch(82% 0.03 85);"></div>
+      <div>
+        <div style="font-family:{{ headingFont }}; font-size:44px; font-weight:700; line-height:1;">{{ adultsVisible }}</div>
+        <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 85); margin-top:4px;">Adults</div>
+      </div>
+      <div style="width:2px; height:40px; background:oklch(82% 0.03 85);"></div>
+      <div>
+        <div style="font-family:{{ headingFont }}; font-size:44px; font-weight:700; line-height:1; color:{{ accent2 }};">{{ childrenVisible }}</div>
+        <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 85); margin-top:4px;">Children</div>
+      </div>
+      <div style="width:2px; height:40px; background:oklch(82% 0.03 85);"></div>
+      <div>
+        <div style="font-family:{{ headingFont }}; font-size:44px; font-weight:700; line-height:1; color:{{ accent1 }};">{{ minorsVisible }}</div>
+        <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 85); margin-top:4px;">Under 21</div>
+      </div>
+      <sc-if value="{{ filtersActive }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-left:auto; align-self:center; font-size:13px; color:oklch(38% 0.16 45); background:oklch(90% 0.09 45 / 0.45); padding:6px 14px; border-radius:20px; font-weight:600;">Viewing a filtered scenario</div>
+      </sc-if>
+    </div>
+
+    <div style="display:flex; flex-wrap:wrap; gap:20px; margin-top:16px;">
+      <sc-for list="{{ statusColumns }}" as="sc" hint-placeholder-count="3">
+        <div style="display:flex; align-items:center; gap:7px; font-size:13px; color:oklch(38% 0.02 80);">
+          <span style="width:9px; height:9px; border-radius:50%; background:{{ sc.color }}; display:inline-block;"></span>
+          {{ sc.name }}: <strong>{{ sc.count }}</strong>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width:1400px; margin:0 auto; padding:10px 40px 0;">
+      <div style="border:2px dashed oklch(78% 0.02 85); border-radius:12px; padding:36px; text-align:center; color:oklch(48% 0.02 85); font-size:16px; background:oklch(98.5% 0.015 85);">
+        No guests yet. Click <strong>+ Add Guests</strong> above to paste in your list.
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- GROUPS NAV + SINGLE LIST -->
+  <div style="max-width:1400px; margin:0 auto; padding:20px {{ pagePad }} 60px; display:flex; gap:24px; align-items:flex-start;">
+
+    <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+      <div style="flex:0 0 220px; display:flex; flex-direction:column; gap:8px; position:sticky; top:20px;">
+        <sc-for list="{{ groupTabs }}" as="gt" hint-placeholder-count="3">
+          <div onClick="{{ gt.onSelect }}" onDragOver="{{ gt.onDragOver }}" onDrop="{{ gt.onDrop }}" style="cursor:pointer; display:flex; align-items:center; gap:8px; padding:12px 14px; border-radius:10px; border:2px solid {{ gt.border }}; background:{{ gt.bg }};">
+            <span style="width:9px; height:9px; border-radius:50%; background:{{ gt.color }}; display:inline-block; flex-shrink:0;"></span>
+            <sc-if value="{{ gt.isAll }}" hint-placeholder-val="{{ false }}">
+              <span style="font-size:15px; font-weight:700; color:{{ gt.textColor }}; flex:1; min-width:0;">{{ gt.name }}</span>
+            </sc-if>
+            <sc-if value="{{ gt.isEditable }}" hint-placeholder-val="{{ true }}">
+              <input value="{{ gt.name }}" onChange="{{ gt.onNameChange }}" style="border:none; background:transparent; outline:none; font-size:15px; font-weight:700; color:{{ gt.textColor }}; flex:1; min-width:0; padding:2px 0; cursor:pointer;" />
+            </sc-if>
+            <span style="font-size:12px; color:{{ gt.textColor }}; opacity:0.75; flex-shrink:0;">{{ gt.count }}</span>
+            <sc-if value="{{ gt.canDelete }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ gt.onDelete }}" style="background:transparent; border:none; color:{{ gt.textColor }}; opacity:0.6; font-size:15px; cursor:pointer; padding:0 2px; flex-shrink:0;">×</button>
+            </sc-if>
+          </div>
+        </sc-for>
+        <button onClick="{{ addStatus }}" style="background:{{ theme.cardBg }}; border:2px dashed oklch(75% 0.02 85); color:oklch(48% 0.02 85); padding:10px 14px; border-radius:10px; font-size:14px; cursor:pointer; text-align:left;">+ Add Group</button>
+      </div>
+    </sc-if>
+
+    <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:12px;">
+
+      <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; gap:8px; overflow-x:auto;">
+          <sc-for list="{{ groupTabs }}" as="gt" hint-placeholder-count="3">
+            <button onClick="{{ gt.onSelect }}" style="flex-shrink:0; display:flex; align-items:center; gap:6px; background:{{ gt.bg }}; border:2px solid {{ gt.border }}; color:{{ gt.textColor }}; padding:8px 16px; border-radius:20px; font-size:14px; font-weight:700; cursor:pointer; white-space:nowrap;">
+              <span style="width:8px; height:8px; border-radius:50%; background:{{ gt.color }}; display:inline-block;"></span>
+              {{ gt.name }} · {{ gt.count }}
+            </button>
+          </sc-for>
+          <button onClick="{{ addStatus }}" style="flex-shrink:0; background:{{ theme.cardBg }}; border:2px dashed oklch(75% 0.02 85); color:oklch(48% 0.02 85); padding:8px 16px; border-radius:20px; font-size:14px; cursor:pointer; white-space:nowrap;">+ Add Group</button>
+        </div>
+      </sc-if>
+
+    <sc-for list="{{ visibleStatusColumns }}" as="col" hint-placeholder-count="1">
+      <div style="position:relative; background:{{ theme.cardBg }}; border:1px solid oklch(88% 0.02 85); border-radius:12px; {{ col.variantExtra }}">
+
+        <sc-if value="{{ col.showTape }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute; top:-11px; left:26px; width:64px; height:22px; background:{{ col.tapeColor }}; opacity:0.6; transform:rotate(-6deg); box-shadow:0 1px 3px oklch(30% 0.02 80 / 0.25); border-radius:1px;"></div>
+          <div style="position:absolute; top:-11px; right:26px; width:64px; height:22px; background:{{ col.tapeColor }}; opacity:0.6; transform:rotate(5deg); box-shadow:0 1px 3px oklch(30% 0.02 80 / 0.25); border-radius:1px;"></div>
+        </sc-if>
+
+        <div style="height:5px; background:{{ col.color }}; border-radius:12px 12px 0 0;"></div>
+        <div style="padding:16px 18px; border-bottom:2px solid oklch(90% 0.02 85); display:flex; align-items:center; gap:10px;">
+          <span style="width:10px; height:10px; border-radius:50%; background:{{ col.color }}; display:inline-block; flex-shrink:0;"></span>
+          <input value="{{ col.name }}" onChange="{{ col.onNameChange }}" style="border:none; background:transparent; outline:none; font-family:{{ headingFont }}; font-size:24px; font-weight:700; color:oklch(24% 0.02 80); flex:1; min-width:0; padding:2px 0;" />
+          <span style="background:oklch(93% 0.02 85); color:oklch(38% 0.02 85); font-size:12px; font-weight:600; padding:3px 10px; border-radius:12px; flex-shrink:0;">{{ col.count }}</span>
+          <sc-if value="{{ col.canDelete }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ col.onDelete }}" style="background:transparent; border:none; color:oklch(60% 0.02 80); font-size:16px; cursor:pointer; padding:0 2px; line-height:1; flex-shrink:0;">×</button>
+          </sc-if>
+        </div>
+
+        <div onDragOver="{{ col.onDragOver }}" onDrop="{{ col.onDrop }}" style="min-height:140px; padding:16px; display:flex; flex-direction:column; gap:8px; background:{{ col.bodyBg }};">
+
+          <sc-if value="{{ col.isEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="text-align:center; color:oklch(60% 0.02 85); font-size:13px; font-style:italic; padding:24px 8px;">No guests here</div>
+          </sc-if>
+
+          <sc-for list="{{ col.groups }}" as="grp" hint-placeholder-count="1">
+
+            <sc-if value="{{ grp.isTagGroup }}" hint-placeholder-val="{{ false }}">
+              <div draggable="true" onDragStart="{{ grp.onDragStart }}" onDragEnd="{{ clearDrag }}" onDragOver="{{ grp.onDragOver }}" onDrop="{{ grp.onDrop }}" style="display:flex; align-items:center; gap:8px; padding:10px 14px; border-radius:8px; border:1.5px solid {{ grp.tagColor }}; background:{{ grp.tintBg }}; margin-top:16px; margin-bottom:4px; cursor:grab; transform:rotate({{ grp.rotation }}deg); box-shadow:0 2px 6px oklch(30% 0.02 80 / 0.12);">
+                <span style="color:oklch(50% 0.02 80); font-size:12px;">⠿</span>
+                <span style="font-size:17px; font-weight:700; color:oklch(22% 0.03 80); flex:1;">{{ grp.tagName }}</span>
+                <span style="font-size:12px; color:oklch(40% 0.02 80);">{{ grp.memberCount }}</span>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ grp.isLoose }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:8px 10px 4px; margin-top:16px; font-size:12px; font-style:italic; color:oklch(58% 0.02 85);">No family tag</div>
+            </sc-if>
+
+            <sc-for list="{{ grp.members }}" as="p" hint-placeholder-count="2">
+              <div draggable="true" onDragStart="{{ p.onDragStart }}" onDragEnd="{{ clearDrag }}" style="position:relative; display:flex; flex-direction:column; gap:6px; padding:9px 10px; border-radius:7px; cursor:grab; border-bottom:1px solid oklch(93% 0.015 85);" style-hover="background:oklch(94% 0.02 85);">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="color:oklch(72% 0.02 85); font-size:12px; flex-shrink:0;">⠿</span>
+                  <sc-if value="{{ p.showStatusDot }}" hint-placeholder-val="{{ false }}">
+                    <span style="width:7px; height:7px; border-radius:50%; background:{{ p.statusDotColor }}; display:inline-block; flex-shrink:0;"></span>
+                  </sc-if>
+                  <sc-if value="{{ p.showSideDot }}" hint-placeholder-val="{{ false }}">
+                    <span style="width:7px; height:7px; border-radius:50%; background:{{ p.sideDotColor }}; display:inline-block; flex-shrink:0;"></span>
+                  </sc-if>
+                  <input value="{{ p.name }}" onChange="{{ p.onNameChange }}" style="border:none; background:transparent; outline:none; font-size:15px; font-weight:500; color:oklch(26% 0.02 80); flex:1; min-width:60px; padding:2px 0;" />
+                  <button onClick="{{ p.onDelete }}" style="background:transparent; border:none; color:oklch(65% 0.02 80); font-size:15px; cursor:pointer; padding:0 2px; flex-shrink:0;">×</button>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; padding-left:20px;">
+                  <sc-if value="{{ p.isPlusOne }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size:10px; font-weight:600; color:oklch(45% 0.02 80); background:oklch(90% 0.02 85); padding:2px 6px; border-radius:10px; flex-shrink:0;">+1</span>
+                  </sc-if>
+                  <sc-if value="{{ p.isChild }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size:11px; padding:3px 8px; border-radius:14px; background:{{ p.childBg }}; border:1px solid {{ p.childBorder }}; color:{{ p.childColor }}; flex-shrink:0;">Child</span>
+                  </sc-if>
+                  <sc-if value="{{ p.isMinor }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size:11px; padding:3px 8px; border-radius:14px; background:{{ p.minorBg }}; border:1px solid {{ p.minorBorder }}; color:{{ p.minorColor }}; flex-shrink:0;">U21</span>
+                  </sc-if>
+                  <sc-if value="{{ p.hasPlusOne }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size:11px; padding:3px 8px; border-radius:14px; background:oklch(90% 0.02 300 / 0.4); border:1px solid oklch(55% 0.05 300); color:oklch(38% 0.05 300); flex-shrink:0;">+1</span>
+                  </sc-if>
+                  <sc-if value="{{ p.tagName }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size:11px; font-weight:600; padding:3px 10px; border-radius:14px; border:1.5px solid {{ p.tagSelectBorder }}; background:{{ p.tagSelectBg }}; color:oklch(28% 0.02 80); flex-shrink:0;">{{ p.tagName }}</span>
+                  </sc-if>
+                  <button onClick="{{ p.onToggleMenu }}" style="font-size:11px; padding:3px 8px; border-radius:14px; cursor:pointer; background:transparent; border:1px solid oklch(80% 0.02 85); color:oklch(48% 0.02 85); flex-shrink:0;">Details ▾</button>
+                </div>
+
+                <sc-if value="{{ p.isMenuOpen }}" hint-placeholder-val="{{ false }}">
+                  <div onClick="{{ stopProp }}" style="position:absolute; top:100%; right:8px; margin-top:4px; background:oklch(99% 0.01 85); border:1px solid oklch(85% 0.02 85); border-radius:10px; box-shadow:0 10px 28px oklch(20% 0.02 80 / 0.2); z-index:40; padding:10px 12px; display:flex; flex-direction:column; gap:8px; min-width:170px;">
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                      <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:oklch(52% 0.02 85);">Family Tag</span>
+                      <select value="{{ p.tagId }}" onChange="{{ p.onTagChange }}" style="font-size:13px; padding:5px 6px; border-radius:6px; border:1px solid oklch(82% 0.02 85);">
+                        <sc-for list="{{ tagOptions }}" as="opt" hint-placeholder-count="1">
+                          <option value="{{ opt.id }}">{{ opt.name }}</option>
+                        </sc-for>
+                      </select>
+                    </div>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:oklch(32% 0.02 80); cursor:pointer; border-top:1px solid oklch(90% 0.02 85); padding-top:8px;">
+                      <input type="checkbox" checked="{{ p.isChild }}" onChange="{{ p.onToggleChild }}" style="width:14px; height:14px; cursor:pointer; accent-color:{{ accent2 }};" />
+                      Child
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:oklch(32% 0.02 80); cursor:pointer;">
+                      <input type="checkbox" checked="{{ p.isMinor }}" onChange="{{ p.onToggleMinor }}" style="width:14px; height:14px; cursor:pointer; accent-color:{{ accent1 }};" />
+                      Under 21
+                    </label>
+                    <sc-if value="{{ p.showPlusOneToggle }}" hint-placeholder-val="{{ true }}">
+                      <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:oklch(32% 0.02 80); cursor:pointer;">
+                        <input type="checkbox" checked="{{ p.hasPlusOne }}" onChange="{{ p.onTogglePlusOne }}" style="width:14px; height:14px; cursor:pointer; accent-color:oklch(55% 0.05 300);" />
+                        +1 (plus one)
+                      </label>
+                    </sc-if>
+                    <div style="border-top:1px solid oklch(90% 0.02 85); margin-top:2px; padding-top:8px; display:flex; flex-direction:column; gap:4px;">
+                      <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:oklch(52% 0.02 85);">Side</span>
+                      <select value="{{ p.sideId }}" onChange="{{ p.onSideChange }}" style="font-size:13px; padding:5px 6px; border-radius:6px; border:1px solid oklch(82% 0.02 85);">
+                        <sc-for list="{{ sideOptions }}" as="sd" hint-placeholder-count="2">
+                          <option value="{{ sd.id }}">{{ sd.name }}</option>
+                        </sc-for>
+                      </select>
+                    </div>
+                    <div style="border-top:1px solid oklch(90% 0.02 85); margin-top:2px; padding-top:8px; display:flex; flex-direction:column; gap:4px;">
+                      <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:oklch(52% 0.02 85);">Move to Group</span>
+                      <select value="{{ p.statusId }}" onChange="{{ p.onStatusChange }}" style="font-size:13px; padding:5px 6px; border-radius:6px; border:1px solid oklch(82% 0.02 85);">
+                        <sc-for list="{{ statuses }}" as="st" hint-placeholder-count="3">
+                          <option value="{{ st.id }}">{{ st.name }}</option>
+                        </sc-for>
+                      </select>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+
+    </div>
+  </div>
+
+  <!-- ADD GUESTS MODAL -->
+  <sc-if value="{{ ui.showAddModal }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeAddModal }}" style="position:fixed; inset:0; background:oklch(20% 0.01 80 / 0.5); display:flex; align-items:center; justify-content:center; z-index:100; padding:20px;">
+      <div onClick="{{ stopProp }}" style="background:{{ theme.cardBg }}; border-radius:12px; padding:28px; width:100%; max-width:480px; box-shadow:0 4px 0 oklch(88% 0.02 85), 0 20px 60px oklch(20% 0.02 80 / 0.3); border-top:5px solid {{ accent1 }};">
+        <div style="font-family:{{ headingFont }}; font-size:28px; font-weight:700; margin-bottom:16px;">Add Guests</div>
+
+        <label style="font-size:12px; text-transform:uppercase; letter-spacing:0.05em; color:oklch(48% 0.02 85);">Add to group</label>
+        <select value="{{ pasteStatusValue }}" onChange="{{ onPasteStatusChange }}" style="width:100%; margin:6px 0 14px; padding:9px 10px; border-radius:8px; border:1px solid oklch(82% 0.02 85); font-size:14px; background:white;">
+          <sc-for list="{{ statuses }}" as="s" hint-placeholder-count="3">
+            <option value="{{ s.id }}">{{ s.name }}</option>
+          </sc-for>
+        </select>
+
+        <label style="font-size:12px; text-transform:uppercase; letter-spacing:0.05em; color:oklch(48% 0.02 85);">Family tag (optional)</label>
+        <select value="{{ ui.pasteTargetTagId }}" onChange="{{ onPasteTagChange }}" style="width:100%; margin:6px 0 14px; padding:9px 10px; border-radius:8px; border:1px solid oklch(82% 0.02 85); font-size:14px; background:white;">
+          <sc-for list="{{ tagOptions }}" as="opt" hint-placeholder-count="1">
+            <option value="{{ opt.id }}">{{ opt.name }}</option>
+          </sc-for>
+        </select>
+
+        <label style="font-size:12px; text-transform:uppercase; letter-spacing:0.05em; color:oklch(48% 0.02 85);">Side</label>
+        <select value="{{ pasteSideValue }}" onChange="{{ onPasteSideChange }}" style="width:100%; margin:6px 0 14px; padding:9px 10px; border-radius:8px; border:1px solid oklch(82% 0.02 85); font-size:14px; background:white;">
+          <sc-for list="{{ sideOptions }}" as="sd" hint-placeholder-count="2">
+            <option value="{{ sd.id }}">{{ sd.name }}</option>
+          </sc-for>
+        </select>
+
+        <label style="font-size:12px; text-transform:uppercase; letter-spacing:0.05em; color:oklch(48% 0.02 85);">Names — one per line</label>
+        <textarea value="{{ ui.pasteText }}" onChange="{{ onPasteTextChange }}" placeholder="Jane Smith&#10;John Smith&#10;Little Timmy Smith" rows="8" style="width:100%; margin:6px 0 12px; padding:10px; border-radius:8px; border:1px solid oklch(82% 0.02 85); font-size:14px; resize:vertical;"></textarea>
+
+        <label style="display:flex; align-items:center; gap:8px; margin-bottom:18px; font-size:14px; color:oklch(32% 0.02 80); cursor:pointer;">
+          <input type="checkbox" checked="{{ ui.pasteWithPlusOne }}" onChange="{{ onPasteWithPlusOneChange }}" style="width:16px; height:16px; cursor:pointer; accent-color:{{ accent1 }};" />
+          Give each guest a +1
+        </label>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+          <button onClick="{{ closeAddModal }}" style="background:transparent; border:1px solid oklch(78% 0.02 85); color:oklch(40% 0.02 80); padding:10px 18px; border-radius:8px; cursor:pointer; font-size:14px;">Cancel</button>
+          <button onClick="{{ submitPaste }}" style="background:{{ accent1 }}; color:oklch(98% 0.005 80); border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600;">Add Guests</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ADD FAMILY MODAL -->
+  <sc-if value="{{ ui.showFamilyModal }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeFamilyModal }}" style="position:fixed; inset:0; background:oklch(20% 0.01 80 / 0.5); display:flex; align-items:center; justify-content:center; z-index:100; padding:20px;">
+      <div onClick="{{ stopProp }}" style="background:{{ theme.cardBg }}; border-radius:12px; padding:28px; width:100%; max-width:480px; max-height:88vh; overflow-y:auto; box-shadow:0 4px 0 oklch(88% 0.02 85), 0 20px 60px oklch(20% 0.02 80 / 0.3); border-top:5px solid {{ accent2 }};">
+        <div style="font-family:{{ headingFont }}; font-size:28px; font-weight:700; margin-bottom:16px;">Add Family</div>
+
+        <label style="font-size:12px; text-transform:uppercase; letter-spacing:0.05em; color:oklch(48% 0.02 85);">Family name</label>
+        <input value="{{ ui.familyName }}" onChange="{{ onFamilyNameChange }}" placeholder="e.g. Smith Family" style="width:100%; margin:6px 0 14px; padding:9px 10px; border-radius:8px; border:1px solid oklch(82% 0.02 85); font-size:14px;" />
+
+        <label style="font-size:12px; text-transform:uppercase; letter-spacing:0.05em; color:oklch(48% 0.02 85);">Color</label>
+        <div style="display:flex; flex-wrap:wrap; gap:10px; margin:8px 0 16px;">
+          <sc-for list="{{ familyPaletteSwatches }}" as="sw" hint-placeholder-count="8">
+            <button onClick="{{ sw.onClick }}" style="width:28px; height:28px; border-radius:50%; background:{{ sw.value }}; cursor:pointer; border:{{ sw.border }};"></button>
+          </sc-for>
+        </div>
+
+        <div style="display:flex; gap:12px; margin-bottom:14px;">
+          <div style="flex:1;">
+            <label style="font-size:12px; text-transform:uppercase; letter-spacing:0.05em; color:oklch(48% 0.02 85);">Group</label>
+            <select value="{{ familyStatusValue }}" onChange="{{ onFamilyStatusChange }}" style="width:100%; margin-top:6px; padding:9px 10px; border-radius:8px; border:1px solid oklch(82% 0.02 85); font-size:14px; background:white;">
+              <sc-for list="{{ statuses }}" as="st" hint-placeholder-count="3">
+                <option value="{{ st.id }}">{{ st.name }}</option>
+              </sc-for>
+            </select>
+          </div>
+          <div style="flex:1;">
+            <label style="font-size:12px; text-transform:uppercase; letter-spacing:0.05em; color:oklch(48% 0.02 85);">Side</label>
+            <select value="{{ familySideValue }}" onChange="{{ onFamilySideChange }}" style="width:100%; margin-top:6px; padding:9px 10px; border-radius:8px; border:1px solid oklch(82% 0.02 85); font-size:14px; background:white;">
+              <sc-for list="{{ sideOptions }}" as="sd" hint-placeholder-count="2">
+                <option value="{{ sd.id }}">{{ sd.name }}</option>
+              </sc-for>
+            </select>
+          </div>
+        </div>
+
+        <label style="font-size:12px; text-transform:uppercase; letter-spacing:0.05em; color:oklch(48% 0.02 85);">Adult 1 (optional)</label>
+        <input value="{{ ui.familyAdult1 }}" onChange="{{ onFamilyAdult1Change }}" placeholder="e.g. Jane Smith" style="width:100%; margin:6px 0 14px; padding:9px 10px; border-radius:8px; border:1px solid oklch(82% 0.02 85); font-size:14px;" />
+
+        <label style="font-size:12px; text-transform:uppercase; letter-spacing:0.05em; color:oklch(48% 0.02 85);">Significant other (optional)</label>
+        <input value="{{ ui.familyAdult2 }}" onChange="{{ onFamilyAdult2Change }}" placeholder="e.g. John Smith" style="width:100%; margin:6px 0 14px; padding:9px 10px; border-radius:8px; border:1px solid oklch(82% 0.02 85); font-size:14px;" />
+
+        <label style="font-size:12px; text-transform:uppercase; letter-spacing:0.05em; color:oklch(48% 0.02 85);">Children</label>
+        <div style="display:flex; flex-direction:column; gap:8px; margin:6px 0 10px;">
+          <sc-for list="{{ familyChildRows }}" as="row" hint-placeholder-count="1">
+            <div style="display:flex; gap:8px; align-items:center;">
+              <input value="{{ row.value }}" onChange="{{ row.onChange }}" placeholder="Child's name" style="flex:1; padding:9px 10px; border-radius:8px; border:1px solid oklch(82% 0.02 85); font-size:14px;" />
+              <button onClick="{{ row.onRemove }}" style="background:transparent; border:none; color:oklch(60% 0.02 80); font-size:18px; cursor:pointer; padding:0 4px;">×</button>
+            </div>
+          </sc-for>
+        </div>
+        <button onClick="{{ addFamilyChildField }}" style="background:transparent; border:2px dashed oklch(75% 0.02 85); color:oklch(48% 0.02 85); padding:7px 14px; border-radius:20px; font-size:13px; cursor:pointer; margin-bottom:18px;">+ Add Child</button>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+          <button onClick="{{ closeFamilyModal }}" style="background:transparent; border:1px solid oklch(78% 0.02 85); color:oklch(40% 0.02 80); padding:10px 18px; border-radius:8px; cursor:pointer; font-size:14px;">Cancel</button>
+          <button onClick="{{ submitFamily }}" style="background:{{ accent2 }}; color:oklch(98% 0.005 80); border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600;">Create Family</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- TAG MODAL -->
+  <sc-if value="{{ ui.showTagModal }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeTagModal }}" style="position:fixed; inset:0; background:oklch(20% 0.01 80 / 0.5); display:flex; align-items:center; justify-content:center; z-index:100; padding:20px;">
+      <div onClick="{{ stopProp }}" style="background:{{ theme.cardBg }}; border-radius:12px; padding:28px; width:100%; max-width:420px; box-shadow:0 4px 0 oklch(88% 0.02 85), 0 20px 60px oklch(20% 0.02 80 / 0.3); border-top:5px solid oklch(58% 0.2 90);">
+        <div style="font-family:{{ headingFont }}; font-size:28px; font-weight:700; margin-bottom:16px;">{{ tagModalTitle }}</div>
+
+        <label style="font-size:12px; text-transform:uppercase; letter-spacing:0.05em; color:oklch(48% 0.02 85);">Family name</label>
+        <input value="{{ ui.newTagName }}" onChange="{{ onNewTagNameChange }}" placeholder="e.g. Smith Family" style="width:100%; margin:6px 0 16px; padding:9px 10px; border-radius:8px; border:1px solid oklch(82% 0.02 85); font-size:14px;" />
+
+        <label style="font-size:12px; text-transform:uppercase; letter-spacing:0.05em; color:oklch(48% 0.02 85);">Color</label>
+        <div style="display:flex; flex-wrap:wrap; gap:10px; margin:8px 0 20px;">
+          <sc-for list="{{ paletteSwatches }}" as="sw" hint-placeholder-count="8">
+            <button onClick="{{ sw.onClick }}" style="width:30px; height:30px; border-radius:50%; background:{{ sw.value }}; cursor:pointer; border:{{ sw.border }};"></button>
+          </sc-for>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; gap:10px;">
+          <sc-if value="{{ ui.editingTagId }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ deleteTag }}" style="background:transparent; border:1px solid oklch(70% 0.08 25); color:oklch(45% 0.1 25); padding:10px 16px; border-radius:8px; cursor:pointer; font-size:14px;">Delete</button>
+          </sc-if>
+          <div style="flex:1;"></div>
+          <button onClick="{{ closeTagModal }}" style="background:transparent; border:1px solid oklch(78% 0.02 85); color:oklch(40% 0.02 80); padding:10px 18px; border-radius:8px; cursor:pointer; font-size:14px;">Cancel</button>
+          <button onClick="{{ saveTag }}" style="background:{{ accent1 }}; color:oklch(98% 0.005 80); border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600;">Save</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;cardStyle&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;index-card&quot;, &quot;options&quot;: [&quot;index-card&quot;, &quot;deckle-edge&quot;, &quot;washi-tape&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Notebook Theme&quot;}, &quot;accentTheme&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;warm-neutral&quot;, &quot;options&quot;: [&quot;warm-neutral&quot;, &quot;sage-cool&quot;, &quot;rose-blush&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Notebook Theme&quot;}, &quot;density&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;comfortable&quot;, &quot;options&quot;: [&quot;comfortable&quot;, &quot;compact&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Notebook Theme&quot;}, &quot;tagTint&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Notebook Theme&quot;}}">
+const WARM_NEUTRAL = [264, 45, 250, 35, 270, 55, 240, 40].map(h => `oklch(58% 0.2 ${h})`);
+const SAGE_COOL = [165, 190, 140, 210, 250, 100, 230, 175].map(h => `oklch(66% 0.05 ${h})`);
+const ROSE_BLUSH = [10, 340, 30, 350, 60, 320, 20, 300].map(h => `oklch(70% 0.08 ${h})`);
+
+const PAPER_THEMES = {
+  cream: { name: 'Cream', pageBg: 'oklch(97% 0.02 85)', ruleColor: 'oklch(80% 0.02 85 / 0.55)', spineBg: 'oklch(92% 0.025 85)', holeColor: 'oklch(76% 0.02 85)', cardBg: 'oklch(98.5% 0.015 85)', toolbarBg: 'oklch(97% 0.025 85)', filterBg: 'oklch(95% 0.03 82)', swatch: 'oklch(90% 0.03 85)' },
+  blush: { name: 'Blush', pageBg: 'oklch(96% 0.03 15)', ruleColor: 'oklch(82% 0.03 15 / 0.5)', spineBg: 'oklch(90% 0.03 15)', holeColor: 'oklch(78% 0.03 15)', cardBg: 'oklch(98% 0.02 15)', toolbarBg: 'oklch(95% 0.03 15)', filterBg: 'oklch(93% 0.035 15)', swatch: 'oklch(88% 0.06 15)' },
+  sage: { name: 'Sage', pageBg: 'oklch(96% 0.025 150)', ruleColor: 'oklch(82% 0.025 150 / 0.5)', spineBg: 'oklch(90% 0.03 150)', holeColor: 'oklch(78% 0.025 150)', cardBg: 'oklch(98% 0.02 150)', toolbarBg: 'oklch(95% 0.03 150)', filterBg: 'oklch(93% 0.035 150)', swatch: 'oklch(85% 0.06 150)' },
+  slate: { name: 'Slate', pageBg: 'oklch(94% 0.015 250)', ruleColor: 'oklch(80% 0.02 250 / 0.5)', spineBg: 'oklch(88% 0.02 250)', holeColor: 'oklch(74% 0.02 250)', cardBg: 'oklch(97% 0.015 250)', toolbarBg: 'oklch(93% 0.02 250)', filterBg: 'oklch(91% 0.025 250)', swatch: 'oklch(82% 0.05 250)' },
+};
+
+const FONT_OPTIONS = {
+  handwritten: { label: 'Handwritten', family: "'Caveat', cursive" },
+  serif: { label: 'Elegant Serif', family: "'Playfair Display', serif" },
+  script: { label: 'Script', family: "'Dancing Script', cursive" },
+};
+
+function contrastText(colorStr) {
+  const [r, g, b] = rgbOf(colorStr);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance >= 0.62 ? 'oklch(20% 0.02 80)' : 'oklch(98% 0.005 80)';
+}
+
+const STORAGE_KEY = 'wedding-guest-list-v8';
+let __idCounter = 0;
+function genId(prefix) {
+  __idCounter += 1;
+  return prefix + '_' + Date.now().toString(36) + '_' + __idCounter;
+}
+function tint(color, alpha) {
+  if (!color) return 'transparent';
+  return `color-mix(in srgb, ${color} ${Math.round(alpha * 100)}%, transparent)`;
+}
+function darken(color, amount) {
+  if (!color) return color;
+  return `color-mix(in srgb, ${color}, black ${amount}%)`;
+}
+function isValidHex(v) {
+  return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test((v || '').trim());
+}
+function rgbOf(colorStr) {
+  const el = document.createElement('div');
+  el.style.color = colorStr;
+  el.style.display = 'none';
+  document.body.appendChild(el);
+  const rgb = getComputedStyle(el).color;
+  document.body.removeChild(el);
+  const m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(rgb);
+  return m ? [parseInt(m[1]), parseInt(m[2]), parseInt(m[3])] : [136, 136, 136];
+}
+function toHex(colorStr) {
+  const [r, g, b] = rgbOf(colorStr);
+  const h = n => n.toString(16).padStart(2, '0');
+  return '#' + h(r) + h(g) + h(b);
+}
+function paperThemeFromColor(color) {
+  const mix = whitePct => `color-mix(in srgb, white ${whitePct}%, ${color})`;
+  return {
+    name: 'Custom',
+    pageBg: mix(93),
+    ruleColor: mix(78),
+    spineBg: mix(88),
+    holeColor: mix(74),
+    cardBg: mix(96),
+    toolbarBg: mix(93),
+    filterBg: mix(90),
+    swatch: mix(72),
+  };
+}
+
+class Component extends DCLogic {
+  state = {
+    eventTitle: 'Our Wedding Guest List',
+    eventSubtitle: '',
+    eventNames: '',
+    eventDate: '',
+    paperTheme: 'cream',
+    customPaperColor: '#c9a24a',
+    fontPairing: 'handwritten',
+    showCustomizePanel: false,
+    statuses: [
+      { id: 'status_guaranteed', name: 'Guaranteed', color: 'oklch(46% 0.22 264)' },
+      { id: 'status_invited', name: 'Invited', color: 'oklch(54% 0.2 45)' },
+      { id: 'status_maybe', name: 'Maybe', color: 'oklch(68% 0.04 85)' },
+    ],
+    tags: [],
+    people: [],
+    sides: [
+      { id: 'side_his', name: 'His', color: 'oklch(46% 0.22 264)' },
+      { id: 'side_hers', name: 'Hers', color: 'oklch(54% 0.2 45)' },
+    ],
+    activeSideView: 'combined',
+    filters: { statusIds: ['status_guaranteed', 'status_invited', 'status_maybe'], tagIds: ['none'], onlyChildren: false, onlyMinors: false },
+    drag: null,
+    dragOverStatusId: null,
+    openTagMenuId: null,
+    openSideColorId: null,
+    isMobile: false,
+    mobileActiveStatusId: null,
+    showMobileMenu: false,
+    ui: {
+      showAddModal: false, showTagModal: false, showFilters: false,
+      editingTagId: null, newTagName: '', newTagColor: WARM_NEUTRAL[0],
+      pasteText: '', pasteTargetStatusId: '', pasteTargetTagId: '', pasteTargetSideId: '', pasteWithPlusOne: false,
+      showExportMenu: false,
+      showFamilyModal: false, familyName: '', familyColor: WARM_NEUTRAL[0],
+      familyStatusId: '', familySideId: '', familyAdult1: '', familyAdult2: '', familyChildren: [''],
+    },
+  };
+
+  fileInputRef = React.createRef();
+
+  componentDidMount() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const data = JSON.parse(raw);
+        this.setState(data);
+      }
+    } catch (e) {}
+    this.updateIsMobile = () => {
+      const mobile = window.innerWidth < 760;
+      if (mobile !== this.state.isMobile) this.setState({ isMobile: mobile });
+    };
+    this.updateIsMobile();
+    window.addEventListener('resize', this.updateIsMobile);
+  }
+
+  componentWillUnmount() {
+    if (this.updateIsMobile) window.removeEventListener('resize', this.updateIsMobile);
+  }
+
+  toggleMobileMenu() {
+    this.setState(s => ({ showMobileMenu: !s.showMobileMenu }));
+  }
+  setMobileActiveStatus(id) {
+    this.setState({ mobileActiveStatusId: id, showMobileMenu: false });
+  }
+
+  componentDidUpdate() {
+    try {
+      const { eventTitle, eventSubtitle, eventNames, eventDate, paperTheme, customPaperColor, fontPairing, statuses, tags, people, filters, sides, activeSideView } = this.state;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ eventTitle, eventSubtitle, eventNames, eventDate, paperTheme, customPaperColor, fontPairing, statuses, tags, people, filters, sides, activeSideView }));
+    } catch (e) {}
+  }
+
+  getPalette() {
+    const theme = this.props.accentTheme || 'warm-neutral';
+    if (theme === 'sage-cool') return SAGE_COOL;
+    if (theme === 'rose-blush') return ROSE_BLUSH;
+    return WARM_NEUTRAL;
+  }
+
+  // ---- people ----
+  updatePerson(id, patch) {
+    this.setState(s => ({ people: s.people.map(p => (p.id === id ? { ...p, ...patch } : p)) }));
+  }
+  removePerson(id) {
+    this.setState(s => {
+      const person = s.people.find(p => p.id === id);
+      let people = s.people.filter(p => p.id !== id);
+      if (person && person.plusOneId) {
+        people = people.filter(p => p.id !== person.plusOneId);
+      }
+      if (person && person.isPlusOne && person.plusOneOf) {
+        people = people.map(p => (p.id === person.plusOneOf ? { ...p, hasPlusOne: false, plusOneId: null } : p));
+      }
+      return { people };
+    });
+  }
+  togglePlusOne(id) {
+    this.setState(s => {
+      const idx = s.people.findIndex(p => p.id === id);
+      if (idx === -1) return null;
+      const person = s.people[idx];
+      if (person.hasPlusOne && person.plusOneId) {
+        const people = s.people
+          .filter(p => p.id !== person.plusOneId)
+          .map(p => (p.id === id ? { ...p, hasPlusOne: false, plusOneId: null } : p));
+        return { people };
+      }
+      const companionId = genId('p');
+      const companion = {
+        id: companionId,
+        name: `${person.name}'s +1`,
+        statusId: person.statusId,
+        tagId: person.tagId,
+        sideId: person.sideId,
+        isChild: false,
+        isMinor: false,
+        isPlusOne: true,
+        plusOneOf: person.id,
+        hasPlusOne: false,
+        plusOneId: null,
+      };
+      const people = [...s.people];
+      people[idx] = { ...person, hasPlusOne: true, plusOneId: companionId };
+      people.splice(idx + 1, 0, companion);
+      return { people };
+    });
+  }
+
+  // ---- drag & drop ----
+  onDragStartPerson(e, id) {
+    this.setState({ drag: { type: 'person', id } });
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', id);
+  }
+  onDragStartGroup(e, tagId) {
+    this.setState({ drag: { type: 'group', tagId } });
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', tagId || '');
+  }
+  clearDrag() {
+    this.setState({ drag: null, dragOverStatusId: null });
+  }
+  closeAllMenus() {
+    this.setState(s => {
+      const patch = {};
+      if (s.openTagMenuId !== null) patch.openTagMenuId = null;
+      if (s.openSideColorId !== null) patch.openSideColorId = null;
+      if (s.showCustomizePanel) patch.showCustomizePanel = false;
+      if (s.ui.showExportMenu) patch.ui = { ...s.ui, showExportMenu: false };
+      return Object.keys(patch).length ? patch : null;
+    });
+  }
+  toggleSideColorPicker(e, id) {
+    e.stopPropagation();
+    this.setState(s => ({ openSideColorId: s.openSideColorId === id ? null : id }));
+  }
+  setSideColor(id, color) {
+    this.setState(s => ({ sides: s.sides.map(sd => (sd.id === id ? { ...sd, color } : sd)), openSideColorId: null }));
+  }
+  setPaperTheme(key) {
+    this.setState({ paperTheme: key });
+  }
+  setCustomPaperColor(color) {
+    this.setState({ paperTheme: 'custom', customPaperColor: color });
+  }
+  setFontPairing(key) {
+    this.setState({ fontPairing: key });
+  }
+  toggleCustomizePanel(e) {
+    e.stopPropagation();
+    this.setState(s => ({ showCustomizePanel: !s.showCustomizePanel }));
+  }
+  toggleTagMenu(e, id) {
+    e.stopPropagation();
+    this.setState(s => ({ openTagMenuId: s.openTagMenuId === id ? null : id }));
+  }
+  allowDrop(e) {
+    e.preventDefault();
+  }
+  onDropOn(e, statusId, tagId) {
+    e.preventDefault();
+    e.stopPropagation();
+    const drag = this.state.drag;
+    if (!drag) return;
+    if (drag.type === 'person') {
+      const patch = tagId !== null ? { statusId, tagId } : { statusId };
+      this.updatePerson(drag.id, patch);
+    } else if (drag.type === 'group') {
+      this.setState(s => ({ people: s.people.map(p => (p.tagId === drag.tagId ? { ...p, statusId } : p)) }));
+    }
+    this.setState({ drag: null, dragOverStatusId: null });
+  }
+
+  // ---- statuses (groups) ----
+  addStatus() {
+    const palette = this.getPalette();
+    const color = palette[this.state.statuses.length % palette.length];
+    const id = genId('status');
+    this.setState(s => ({
+      statuses: [...s.statuses, { id, name: 'New Group', color }],
+      filters: { ...s.filters, statusIds: [...s.filters.statusIds, id] },
+    }));
+  }
+  renameStatus(id, name) {
+    this.setState(s => ({ statuses: s.statuses.map(c => (c.id === id ? { ...c, name } : c)) }));
+  }
+  deleteStatus(id) {
+    this.setState(s => {
+      if (s.statuses.length <= 1) return null;
+      const remaining = s.statuses.filter(c => c.id !== id);
+      const fallbackId = remaining[0].id;
+      return {
+        statuses: remaining,
+        people: s.people.map(p => (p.statusId === id ? { ...p, statusId: fallbackId } : p)),
+        filters: { ...s.filters, statusIds: s.filters.statusIds.filter(x => x !== id) },
+      };
+    });
+  }
+
+  // ---- tags (families) ----
+  openNewTagModal() {
+    const palette = this.getPalette();
+    const color = palette[this.state.tags.length % palette.length];
+    this.setState(s => ({ ui: { ...s.ui, showTagModal: true, editingTagId: null, newTagName: '', newTagColor: color } }));
+  }
+  openEditTagModal(t) {
+    this.setState(s => ({ ui: { ...s.ui, showTagModal: true, editingTagId: t.id, newTagName: t.name, newTagColor: t.color } }));
+  }
+  closeTagModal() {
+    this.setState(s => ({ ui: { ...s.ui, showTagModal: false } }));
+  }
+  saveTag() {
+    const name = this.state.ui.newTagName.trim();
+    if (!name) return;
+    const color = this.state.ui.newTagColor;
+    if (this.state.ui.editingTagId) {
+      const editId = this.state.ui.editingTagId;
+      this.setState(s => ({ tags: s.tags.map(t => (t.id === editId ? { ...t, name, color } : t)), ui: { ...s.ui, showTagModal: false } }));
+    } else {
+      const id = genId('tag');
+      this.setState(s => ({
+        tags: [...s.tags, { id, name, color }],
+        filters: { ...s.filters, tagIds: [...s.filters.tagIds, id] },
+        ui: { ...s.ui, showTagModal: false },
+      }));
+    }
+  }
+  deleteTag() {
+    const id = this.state.ui.editingTagId;
+    if (!id) return;
+    this.setState(s => ({
+      tags: s.tags.filter(t => t.id !== id),
+      people: s.people.map(p => (p.tagId === id ? { ...p, tagId: null } : p)),
+      filters: { ...s.filters, tagIds: s.filters.tagIds.filter(x => x !== id) },
+      ui: { ...s.ui, showTagModal: false },
+    }));
+  }
+
+  // ---- add family (name + significant other + children) ----
+  openFamilyModal() {
+    const palette = this.getPalette();
+    const color = palette[this.state.tags.length % palette.length];
+    this.setState(s => ({
+      ui: {
+        ...s.ui,
+        showFamilyModal: true,
+        familyName: '',
+        familyColor: color,
+        familyStatusId: '',
+        familySideId: '',
+        familyAdult1: '',
+        familyAdult2: '',
+        familyChildren: [''],
+      },
+    }));
+  }
+  closeFamilyModal() {
+    this.setState(s => ({ ui: { ...s.ui, showFamilyModal: false } }));
+  }
+  addFamilyChildField() {
+    this.setState(s => ({ ui: { ...s.ui, familyChildren: [...s.ui.familyChildren, ''] } }));
+  }
+  removeFamilyChildField(idx) {
+    this.setState(s => ({ ui: { ...s.ui, familyChildren: s.ui.familyChildren.filter((_, i) => i !== idx) } }));
+  }
+  updateFamilyChildField(idx, value) {
+    this.setState(s => ({ ui: { ...s.ui, familyChildren: s.ui.familyChildren.map((v, i) => (i === idx ? value : v)) } }));
+  }
+  submitFamily() {
+    const name = this.state.ui.familyName.trim();
+    if (!name) return;
+    const color = this.state.ui.familyColor;
+    const statusId = this.state.ui.familyStatusId || this.state.statuses[0].id;
+    const sideId = this.state.ui.familySideId || this.state.sides[0].id;
+    const tagId = genId('tag');
+    const tag = { id: tagId, name, color };
+    const makePerson = (personName, isChild) => ({
+      id: genId('p'),
+      name: personName,
+      statusId,
+      tagId,
+      sideId,
+      isChild,
+      isMinor: false,
+      isPlusOne: false,
+      plusOneOf: null,
+      hasPlusOne: false,
+      plusOneId: null,
+    });
+    const newPeople = [];
+    const adult1 = this.state.ui.familyAdult1.trim();
+    const adult2 = this.state.ui.familyAdult2.trim();
+    if (adult1) newPeople.push(makePerson(adult1, false));
+    if (adult2) newPeople.push(makePerson(adult2, false));
+    this.state.ui.familyChildren.forEach(childName => {
+      const trimmed = childName.trim();
+      if (trimmed) newPeople.push(makePerson(trimmed, true));
+    });
+    this.setState(s => ({
+      tags: [...s.tags, tag],
+      people: [...s.people, ...newPeople],
+      filters: { ...s.filters, tagIds: [...s.filters.tagIds, tagId] },
+      ui: { ...s.ui, showFamilyModal: false },
+    }));
+  }
+
+  // ---- add guests modal ----
+  openAddModal() {
+    this.setState(s => ({ ui: { ...s.ui, showAddModal: true, pasteText: '', pasteTargetStatusId: '', pasteTargetTagId: '', pasteTargetSideId: '', pasteWithPlusOne: false } }));
+  }
+  closeAddModal() {
+    this.setState(s => ({ ui: { ...s.ui, showAddModal: false } }));
+  }
+  submitPaste() {
+    const lines = this.state.ui.pasteText.split('\n').map(l => l.trim()).filter(Boolean);
+    if (lines.length === 0) return;
+    const statusId = this.state.ui.pasteTargetStatusId || this.state.statuses[0].id;
+    const tagId = this.state.ui.pasteTargetTagId || null;
+    const sideId =
+      this.state.ui.pasteTargetSideId ||
+      (this.state.activeSideView !== 'combined' ? this.state.activeSideView : this.state.sides[0].id);
+    const withPlusOne = this.state.ui.pasteWithPlusOne;
+    const newPeople = [];
+    lines.forEach(name => {
+      const pid = genId('p');
+      const person = { id: pid, name, statusId, tagId, sideId, isChild: false, isMinor: false, isPlusOne: false, plusOneOf: null, hasPlusOne: false, plusOneId: null };
+      if (withPlusOne) {
+        const cid = genId('p');
+        person.hasPlusOne = true;
+        person.plusOneId = cid;
+        newPeople.push(person);
+        newPeople.push({ id: cid, name: `${name}'s +1`, statusId, tagId, sideId, isChild: false, isMinor: false, isPlusOne: true, plusOneOf: pid, hasPlusOne: false, plusOneId: null });
+      } else {
+        newPeople.push(person);
+      }
+    });
+    this.setState(s => ({ people: [...s.people, ...newPeople], ui: { ...s.ui, showAddModal: false, pasteText: '', pasteWithPlusOne: false } }));
+  }
+
+  // ---- filters ----
+  toggleStatusFilter(id) {
+    this.setState(s => {
+      const has = s.filters.statusIds.includes(id);
+      return { filters: { ...s.filters, statusIds: has ? s.filters.statusIds.filter(x => x !== id) : [...s.filters.statusIds, id] } };
+    });
+  }
+  toggleTagFilter(id) {
+    this.setState(s => {
+      const has = s.filters.tagIds.includes(id);
+      return { filters: { ...s.filters, tagIds: has ? s.filters.tagIds.filter(x => x !== id) : [...s.filters.tagIds, id] } };
+    });
+  }
+  toggleOnlyChildren() {
+    this.setState(s => ({ filters: { ...s.filters, onlyChildren: !s.filters.onlyChildren } }));
+  }
+  toggleOnlyMinors() {
+    this.setState(s => ({ filters: { ...s.filters, onlyMinors: !s.filters.onlyMinors } }));
+  }
+  resetFilters() {
+    this.setState(s => ({
+      filters: { statusIds: s.statuses.map(c => c.id), tagIds: [...s.tags.map(t => t.id), 'none'], onlyChildren: false, onlyMinors: false },
+    }));
+  }
+  toggleFiltersPanel() {
+    this.setState(s => ({ ui: { ...s.ui, showFilters: !s.ui.showFilters } }));
+  }
+
+  // ---- his & hers sides ----
+  setActiveSideView(view) {
+    this.setState({ activeSideView: view });
+  }
+  renameSide(id, name) {
+    this.setState(s => ({ sides: s.sides.map(sd => (sd.id === id ? { ...sd, name } : sd)) }));
+  }
+
+  // ---- export / import ----
+  toggleExportMenu() {
+    this.setState(s => ({ ui: { ...s.ui, showExportMenu: !s.ui.showExportMenu } }));
+  }
+  downloadFile(filename, content, mime) {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+  safeFileName() {
+    return (this.state.eventTitle || 'guest-list').trim().replace(/[^a-z0-9]+/gi, '-').toLowerCase() || 'guest-list';
+  }
+  exportJSON() {
+    const { eventTitle, eventSubtitle, eventNames, eventDate, paperTheme, customPaperColor, fontPairing, statuses, tags, people, sides, activeSideView } = this.state;
+    const data = { eventTitle, eventSubtitle, eventNames, eventDate, paperTheme, customPaperColor, fontPairing, statuses, tags, people, sides, activeSideView, exportedAt: new Date().toISOString() };
+    this.downloadFile(`${this.safeFileName()}.json`, JSON.stringify(data, null, 2), 'application/json');
+    this.setState(s => ({ ui: { ...s.ui, showExportMenu: false } }));
+  }
+  exportCSV() {
+    const { statuses, tags, people } = this.state;
+    const statusById = {};
+    statuses.forEach(st => (statusById[st.id] = st.name));
+    const tagById = {};
+    tags.forEach(t => (tagById[t.id] = t.name));
+    const esc = v => {
+      const str = String(v == null ? '' : v);
+      return /[",\n]/.test(str) ? '"' + str.replace(/"/g, '""') + '"' : str;
+    };
+    const rows = [['Name', 'Group', 'Family Tag', 'Child', 'Under 21', 'Plus One'].join(',')];
+    people.forEach(p => {
+      const parent = p.isPlusOne && p.plusOneOf ? people.find(x => x.id === p.plusOneOf) : null;
+      const plusOneVal = parent ? `Yes (of ${parent.name})` : p.hasPlusOne ? 'Yes' : 'No';
+      rows.push(
+        [
+          esc(p.name),
+          esc(statusById[p.statusId] || ''),
+          esc(p.tagId ? tagById[p.tagId] || '' : ''),
+          esc(p.isChild ? 'Yes' : 'No'),
+          esc(p.isMinor ? 'Yes' : 'No'),
+          esc(plusOneVal),
+        ].join(',')
+      );
+    });
+    this.downloadFile(`${this.safeFileName()}.csv`, rows.join('\n'), 'text/csv');
+    this.setState(s => ({ ui: { ...s.ui, showExportMenu: false } }));
+  }
+  triggerImport() {
+    if (this.fileInputRef && this.fileInputRef.current) this.fileInputRef.current.click();
+  }
+  handleImportFile(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if (!data || !Array.isArray(data.people) || !Array.isArray(data.statuses)) {
+          window.alert("That file doesn't look like a guest list export.");
+          return;
+        }
+        if (this.state.people.length > 0) {
+          const ok = window.confirm('Importing will replace your current guest list. Continue?');
+          if (!ok) return;
+        }
+        const statuses = data.statuses;
+        const tags = Array.isArray(data.tags) ? data.tags : [];
+        const people = data.people;
+        const sides =
+          Array.isArray(data.sides) && data.sides.length > 0
+            ? data.sides
+            : [
+                { id: 'side_his', name: 'His', color: 'oklch(46% 0.22 264)' },
+                { id: 'side_hers', name: 'Hers', color: 'oklch(54% 0.2 45)' },
+              ];
+        this.setState({
+          eventTitle: data.eventTitle || this.state.eventTitle,
+          eventSubtitle: data.eventSubtitle || '',
+          eventNames: data.eventNames || '',
+          eventDate: data.eventDate || '',
+          paperTheme: data.paperTheme === 'custom' || (data.paperTheme && PAPER_THEMES[data.paperTheme]) ? data.paperTheme : 'cream',
+          customPaperColor: data.customPaperColor || this.state.customPaperColor,
+          fontPairing: data.fontPairing && FONT_OPTIONS[data.fontPairing] ? data.fontPairing : 'handwritten',
+          statuses,
+          tags,
+          people,
+          sides,
+          activeSideView: data.activeSideView || 'combined',
+          filters: { statusIds: statuses.map(st => st.id), tagIds: [...tags.map(t => t.id), 'none'], onlyChildren: false, onlyMinors: false },
+        });
+      } catch (err) {
+        window.alert("Could not read that file. Make sure it's a guest list JSON export.");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  }
+
+  isVisible(p, filters, sideView) {
+    if (!filters.statusIds.includes(p.statusId)) return false;
+    const tagKey = p.tagId || 'none';
+    if (!filters.tagIds.includes(tagKey)) return false;
+    if (filters.onlyChildren || filters.onlyMinors) {
+      const matches = (filters.onlyChildren && p.isChild) || (filters.onlyMinors && p.isMinor);
+      if (!matches) return false;
+    }
+    if (sideView && sideView !== 'combined') {
+      const ps = p.sideId || (this.state.sides[0] && this.state.sides[0].id);
+      if (ps !== sideView) return false;
+    }
+    return true;
+  }
+
+  buildPersonVM(p) {
+    const density = this.props.density || 'comfortable';
+    const pad = density === 'compact' ? '4px 6px' : '7px 8px';
+    const sides = this.state.sides;
+    const resolvedSideId = p.sideId || (sides[0] ? sides[0].id : '');
+    const sideIdx = Math.max(0, sides.findIndex(sd => sd.id === resolvedSideId));
+    const sideObj = sides.find(sd => sd.id === resolvedSideId);
+    const sideColor = (sideObj && sideObj.color) || 'oklch(46% 0.22 264)';
+    const accent1 = (sides[0] && sides[0].color) || 'oklch(46% 0.22 264)';
+    const accent2 = (sides[1] && sides[1].color) || 'oklch(54% 0.2 45)';
+    return {
+      id: p.id,
+      name: p.name,
+      tagId: p.tagId || '',
+      pad,
+      sideId: resolvedSideId,
+      onSideChange: e => this.updatePerson(p.id, { sideId: e.target.value }),
+      showSideDot: this.state.activeSideView === 'combined',
+      sideDotColor: sideColor,
+      showStatusDot: false,
+      statusDotColor: 'oklch(70% 0.02 85)',
+      isPlusOne: !!p.isPlusOne,
+      hasPlusOne: !!p.hasPlusOne,
+      showPlusOneToggle: !p.isPlusOne,
+      onTogglePlusOne: () => this.togglePlusOne(p.id),
+      isChild: !!p.isChild,
+      isMinor: !!p.isMinor,
+      isMenuOpen: this.state.openTagMenuId === p.id,
+      onToggleMenu: e => this.toggleTagMenu(e, p.id),
+      onDragStart: e => this.onDragStartPerson(e, p.id),
+      onNameChange: e => this.updatePerson(p.id, { name: e.target.value }),
+      onToggleChild: () => this.updatePerson(p.id, { isChild: !p.isChild }),
+      onToggleMinor: () => this.updatePerson(p.id, { isMinor: !p.isMinor }),
+      onTagChange: e => this.updatePerson(p.id, { tagId: e.target.value || null }),
+      onDelete: () => this.removePerson(p.id),
+      statusId: p.statusId,
+      onStatusChange: e => this.updatePerson(p.id, { statusId: e.target.value }),
+      tagName: (() => {
+        const at = this.state.tags.find(t => t.id === p.tagId);
+        return at ? at.name : '';
+      })(),
+      tagSelectBg: (() => {
+        const at = this.state.tags.find(t => t.id === p.tagId);
+        return at ? tint(at.color, 0.3) : 'oklch(99% 0.01 85)';
+      })(),
+      tagSelectBorder: (() => {
+        const at = this.state.tags.find(t => t.id === p.tagId);
+        return at ? at.color : 'oklch(85% 0.02 85)';
+      })(),
+      childBg: p.isChild ? tint(accent2, 0.32) : 'transparent',
+      childBorder: p.isChild ? accent2 : 'oklch(82% 0.02 85)',
+      childColor: p.isChild ? darken(accent2, 35) : 'oklch(56% 0.02 85)',
+      minorBg: p.isMinor ? tint(accent1, 0.32) : 'transparent',
+      minorBorder: p.isMinor ? accent1 : 'oklch(82% 0.02 85)',
+      minorColor: p.isMinor ? darken(accent1, 35) : 'oklch(56% 0.02 85)',
+    };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const filters = s.filters;
+    const showTint = this.props.tagTint !== false;
+    const cardStyle = this.props.cardStyle || 'index-card';
+
+    const cardVariantExtra =
+      cardStyle === 'deckle-edge'
+        ? 'clip-path:polygon(0% 1.2%, 4% 0%, 9% 1.6%, 15% 0.1%, 21% 1.4%, 28% 0%, 35% 1.5%, 42% 0.2%, 49% 1.3%, 56% 0%, 63% 1.5%, 70% 0.1%, 77% 1.4%, 84% 0%, 91% 1.5%, 96% 0.2%, 100% 1.2%, 100% 98.8%, 96% 100%, 91% 98.5%, 84% 100%, 77% 98.6%, 70% 100%, 63% 98.5%, 56% 100%, 49% 98.7%, 42% 100%, 35% 98.5%, 28% 100%, 21% 98.6%, 15% 100%, 9% 98.4%, 4% 100%, 0% 98.8%); box-shadow:0 3px 8px oklch(30% 0.02 80 / 0.18);'
+        : 'box-shadow:0 1px 3px oklch(30% 0.02 80 / 0.1), 0 6px 16px oklch(30% 0.02 80 / 0.07);';
+    const showTape = cardStyle === 'washi-tape';
+    const accent1 = (s.sides[0] && s.sides[0].color) || 'oklch(46% 0.22 264)';
+    const accent2 = (s.sides[1] && s.sides[1].color) || 'oklch(54% 0.2 45)';
+    const tapeColors = [accent1, accent2];
+    const isMobile = s.isMobile;
+    const isDesktop = !isMobile;
+    const pagePad = isMobile ? '18px' : '40px';
+    const spineWidth = isMobile ? 18 : 56;
+    const titleFontSize = isMobile ? '32px' : '48px';
+    const theme = s.paperTheme === 'custom' ? paperThemeFromColor(s.customPaperColor) : PAPER_THEMES[s.paperTheme] || PAPER_THEMES.cream;
+    const paperThemeSwatches = Object.keys(PAPER_THEMES).map(key => ({
+      key,
+      name: PAPER_THEMES[key].name,
+      swatch: PAPER_THEMES[key].swatch,
+      active: s.paperTheme === key ? 'oklch(30% 0.02 80)' : 'transparent',
+      onClick: () => this.setPaperTheme(key),
+    }));
+    const customPaperHex = s.customPaperColor;
+    const onCustomPaperColorChange = e => this.setCustomPaperColor(e.target.value);
+    const headingFont = (FONT_OPTIONS[s.fontPairing] || FONT_OPTIONS.handwritten).family;
+    const fontOptions = Object.keys(FONT_OPTIONS).map(key => ({
+      key,
+      label: FONT_OPTIONS[key].label,
+      family: FONT_OPTIONS[key].family,
+      bg: s.fontPairing === key ? tint(accent1, 0.25) : 'transparent',
+      border: s.fontPairing === key ? accent1 : 'oklch(85% 0.02 85)',
+      onClick: () => this.setFontPairing(key),
+    }));
+
+    const isVisible = p => this.isVisible(p, filters, s.activeSideView);
+
+    const statusColumns = s.statuses.map((col, colIdx) => {
+      const colPeopleAll = s.people.filter(p => p.statusId === col.id);
+      const colPeopleVisible = colPeopleAll.filter(isVisible);
+      const tagById = {};
+      s.tags.forEach(t => (tagById[t.id] = t));
+
+      const groups = [];
+      s.tags.forEach((t, tIdx) => {
+        const members = colPeopleVisible.filter(p => p.tagId === t.id).map(p => this.buildPersonVM(p));
+        if (members.length > 0) {
+          groups.push({
+            key: 'tag_' + t.id,
+            isTagGroup: true,
+            isLoose: false,
+            tagId: t.id,
+            tagName: t.name,
+            tagColor: t.color,
+            tintBg: showTint ? tint(t.color, 0.38) : 'transparent',
+            memberCount: members.length,
+            rotation: tIdx % 2 === 0 ? -1.5 : 1.5,
+            members,
+            onDragStart: e => this.onDragStartGroup(e, t.id),
+            onDragOver: e => this.allowDrop(e),
+            onDrop: e => this.onDropOn(e, col.id, t.id),
+          });
+        }
+      });
+      const looseMembers = colPeopleVisible.filter(p => !p.tagId || !tagById[p.tagId]).map(p => this.buildPersonVM(p));
+      if (looseMembers.length > 0) {
+        groups.push({ key: 'loose', isTagGroup: false, isLoose: true, members: looseMembers });
+      }
+
+      return {
+        id: col.id,
+        name: col.name,
+        color: col.color,
+        count: colPeopleVisible.length,
+        isEmpty: colPeopleVisible.length === 0,
+        canDelete: s.statuses.length > 1,
+        groups,
+        variantExtra: cardVariantExtra,
+        showTape,
+        tapeColor: tapeColors[colIdx % tapeColors.length],
+        bodyBg: s.dragOverStatusId === col.id ? tint(col.color, 0.08) : 'transparent',
+        onNameChange: e => this.renameStatus(col.id, e.target.value),
+        onDelete: () => this.deleteStatus(col.id),
+        onDragOver: e => {
+          this.allowDrop(e);
+          if (s.dragOverStatusId !== col.id) this.setState({ dragOverStatusId: col.id });
+        },
+        onDrop: e => this.onDropOn(e, col.id, null),
+      };
+    });
+
+    const resolvedActiveStatusId =
+      s.mobileActiveStatusId === 'ALL_GROUPS' || (s.mobileActiveStatusId && s.statuses.some(c => c.id === s.mobileActiveStatusId))
+        ? s.mobileActiveStatusId
+        : s.statuses[0]
+        ? s.statuses[0].id
+        : null;
+
+    const withStatusDot = p => {
+      const vm = this.buildPersonVM(p);
+      const st = s.statuses.find(x => x.id === p.statusId);
+      vm.showStatusDot = true;
+      vm.statusDotColor = st ? st.color : 'oklch(70% 0.02 85)';
+      return vm;
+    };
+
+    let combinedColumn = null;
+    if (resolvedActiveStatusId === 'ALL_GROUPS') {
+      const allPeopleVisible = s.people.filter(isVisible);
+      const tagByIdAll = {};
+      s.tags.forEach(t => (tagByIdAll[t.id] = t));
+      const combinedGroups = [];
+      s.tags.forEach((t, tIdx) => {
+        const members = allPeopleVisible.filter(p => p.tagId === t.id).map(withStatusDot);
+        if (members.length > 0) {
+          combinedGroups.push({
+            key: 'tag_' + t.id,
+            isTagGroup: true,
+            isLoose: false,
+            tagId: t.id,
+            tagName: t.name,
+            tagColor: t.color,
+            tintBg: showTint ? tint(t.color, 0.38) : 'transparent',
+            memberCount: members.length,
+            rotation: tIdx % 2 === 0 ? -1.5 : 1.5,
+            members,
+            onDragStart: e => this.onDragStartGroup(e, t.id),
+            onDragOver: e => this.allowDrop(e),
+            onDrop: e => e.preventDefault(),
+          });
+        }
+      });
+      const combinedLoose = allPeopleVisible.filter(p => !p.tagId || !tagByIdAll[p.tagId]).map(withStatusDot);
+      if (combinedLoose.length > 0) {
+        combinedGroups.push({ key: 'loose', isTagGroup: false, isLoose: true, members: combinedLoose });
+      }
+      combinedColumn = {
+        id: 'ALL_GROUPS',
+        name: 'All Groups',
+        color: 'oklch(38% 0.02 85)',
+        count: allPeopleVisible.length,
+        isEmpty: allPeopleVisible.length === 0,
+        canDelete: false,
+        groups: combinedGroups,
+        variantExtra: cardVariantExtra,
+        showTape,
+        tapeColor: tapeColors[0],
+        bodyBg: 'transparent',
+        onNameChange: () => {},
+        onDelete: () => {},
+        onDragOver: e => e.preventDefault(),
+        onDrop: () => {},
+      };
+    }
+
+    const visibleStatusColumns =
+      resolvedActiveStatusId === 'ALL_GROUPS' ? [combinedColumn] : statusColumns.filter(c => c.id === resolvedActiveStatusId);
+    const allGroupsTab = {
+      id: 'ALL_GROUPS',
+      name: 'All Groups',
+      count: s.people.length,
+      color: 'oklch(38% 0.02 85)',
+      isAll: true,
+      isEditable: false,
+      bg: resolvedActiveStatusId === 'ALL_GROUPS' ? 'oklch(30% 0.02 80)' : 'oklch(97% 0.015 85)',
+      border: resolvedActiveStatusId === 'ALL_GROUPS' ? 'oklch(30% 0.02 80)' : 'oklch(88% 0.02 85)',
+      textColor: resolvedActiveStatusId === 'ALL_GROUPS' ? 'oklch(98% 0.005 80)' : 'oklch(42% 0.02 85)',
+      canDelete: false,
+      onSelect: () => this.setMobileActiveStatus('ALL_GROUPS'),
+      onNameChange: () => {},
+      onDelete: () => {},
+      onDragOver: e => e.preventDefault(),
+      onDrop: () => {},
+    };
+    const groupTabs = [
+      allGroupsTab,
+      ...statusColumns.map(col => {
+        const active = col.id === resolvedActiveStatusId;
+        return {
+          id: col.id,
+          name: col.name,
+          count: col.count,
+          color: col.color,
+          isAll: false,
+          isEditable: true,
+          bg: active ? tint(col.color, 0.2) : 'oklch(97% 0.015 85)',
+          border: active ? col.color : 'oklch(88% 0.02 85)',
+          textColor: active ? 'oklch(22% 0.03 80)' : 'oklch(42% 0.02 85)',
+          canDelete: s.statuses.length > 1,
+          onSelect: () => this.setMobileActiveStatus(col.id),
+          onNameChange: e => this.renameStatus(col.id, e.target.value),
+          onDelete: () => this.deleteStatus(col.id),
+          onDragOver: e => {
+            this.allowDrop(e);
+            if (s.dragOverStatusId !== col.id) this.setState({ dragOverStatusId: col.id });
+          },
+          onDrop: e => this.onDropOn(e, col.id, null),
+        };
+      }),
+    ];
+
+    const allVisible = s.people.filter(isVisible);
+    const totalVisible = allVisible.length;
+    const totalAll = s.people.length;
+    const adultsVisible = allVisible.filter(p => !p.isChild).length;
+    const childrenVisible = allVisible.filter(p => p.isChild).length;
+    const minorsVisible = allVisible.filter(p => p.isMinor).length;
+
+    const filtersActive =
+      filters.onlyChildren ||
+      filters.onlyMinors ||
+      filters.statusIds.length !== s.statuses.length ||
+      filters.tagIds.length !== s.tags.length + 1;
+
+    const tagOptions = [{ id: '', name: 'No tag' }, ...s.tags.map(t => ({ id: t.id, name: t.name }))];
+
+    const toolbarTags = s.tags.map((t, i) => ({
+      id: t.id,
+      name: t.name,
+      color: t.color,
+      chipBg: tint(t.color, 0.38),
+      rotation: i % 2 === 0 ? -2 : 2,
+      onEdit: () => this.openEditTagModal(t),
+    }));
+
+    const statusFilterChips = s.statuses.map(col => ({
+      id: col.id,
+      name: col.name,
+      color: col.color,
+      opacity: filters.statusIds.includes(col.id) ? 1 : 0.4,
+      bg: filters.statusIds.includes(col.id) ? tint(col.color, 0.12) : 'transparent',
+      onToggle: () => this.toggleStatusFilter(col.id),
+    }));
+    const tagFilterChips = [
+      ...s.tags.map((t, i) => ({
+        id: t.id,
+        name: t.name,
+        color: t.color,
+        opacity: filters.tagIds.includes(t.id) ? 1 : 0.4,
+        bg: filters.tagIds.includes(t.id) ? tint(t.color, 0.35) : 'transparent',
+        rotation: i % 2 === 0 ? -1.5 : 1.5,
+        onToggle: () => this.toggleTagFilter(t.id),
+      })),
+      {
+        id: 'none',
+        name: 'No family tag',
+        color: 'oklch(65% 0.02 85)',
+        opacity: filters.tagIds.includes('none') ? 1 : 0.4,
+        bg: filters.tagIds.includes('none') ? 'oklch(91% 0.02 85)' : 'transparent',
+        rotation: 0,
+        onToggle: () => this.toggleTagFilter('none'),
+      },
+    ];
+
+    const sideTabs = s.sides.map(sd => {
+      const isActive = s.activeSideView === sd.id;
+      const color = sd.color || 'oklch(46% 0.22 264)';
+      return {
+        id: sd.id,
+        name: sd.name,
+        inputWidth: Math.max(46, sd.name.length * 10 + 12),
+        bg: color,
+        opacity: isActive ? 1 : 0.62,
+        lift: isActive ? '-3px' : '0px',
+        textColor: contrastText(color),
+        onSelect: () => this.setActiveSideView(sd.id),
+        onRename: e => this.renameSide(sd.id, e.target.value),
+        showColorPicker: s.openSideColorId === sd.id,
+        onToggleColorPicker: e => this.toggleSideColorPicker(e, sd.id),
+        currentHex: toHex(color),
+        onPickColor: e => this.setSideColor(sd.id, e.target.value),
+        onTextCommit: e => {
+          const v = e.target.value.trim();
+          if (isValidHex(v)) this.setSideColor(sd.id, v);
+        },
+        onTextKeyDown: e => {
+          if (e.key === 'Enter') e.target.blur();
+        },
+      };
+    });
+    const combinedActive = s.activeSideView === 'combined';
+    const combinedTab = {
+      bg: combinedActive ? 'oklch(30% 0.02 80)' : 'oklch(94% 0.02 85)',
+      color: combinedActive ? 'oklch(98% 0.005 80)' : 'oklch(42% 0.02 85)',
+      border: combinedActive ? 'oklch(30% 0.02 80)' : 'oklch(82% 0.02 85)',
+      onSelect: () => this.setActiveSideView('combined'),
+    };
+    const sideOptions = s.sides.map(sd => ({ id: sd.id, name: sd.name }));
+
+    const familyStatusValue = s.ui.familyStatusId || (s.statuses[0] ? s.statuses[0].id : '');
+    const familySideValue = s.ui.familySideId || (s.sides[0] ? s.sides[0].id : '');
+    const familyChildRows = s.ui.familyChildren.map((val, i) => ({
+      index: i,
+      value: val,
+      onChange: e => this.updateFamilyChildField(i, e.target.value),
+      onRemove: () => this.removeFamilyChildField(i),
+    }));
+    const familyPaletteSwatches = this.getPalette().map(c => ({
+      value: c,
+      border: c === s.ui.familyColor ? '3px solid oklch(25% 0.02 80)' : '1px solid oklch(85% 0.02 85)',
+      onClick: () => this.setState(st => ({ ui: { ...st.ui, familyColor: c } })),
+    }));
+
+    const paletteSwatches = this.getPalette().map(c => ({
+      value: c,
+      border: c === s.ui.newTagColor ? '3px solid oklch(25% 0.02 80)' : '1px solid oklch(85% 0.02 85)',
+      onClick: () => this.setState(st => ({ ui: { ...st.ui, newTagColor: c } })),
+    }));
+
+    return {
+      eventTitle: s.eventTitle,
+      eventNames: s.eventNames,
+      eventDate: s.eventDate,
+      onTitleChange: e => this.setState({ eventTitle: e.target.value }),
+      onNamesChange: e => this.setState({ eventNames: e.target.value }),
+      onDateChange: e => this.setState({ eventDate: e.target.value }),
+
+      theme,
+      paperThemeSwatches,
+      headingFont,
+      fontOptions,
+      accent1,
+      accent2,
+      accentColorGroups: s.sides.map(sd => ({
+        id: sd.id,
+        name: sd.name,
+        current: sd.color,
+        currentHex: toHex(sd.color),
+        onPick: e => this.setSideColor(sd.id, e.target.value),
+        onTextCommit: e => {
+          const v = e.target.value.trim();
+          if (isValidHex(v)) this.setSideColor(sd.id, v);
+        },
+        onTextKeyDown: e => {
+          if (e.key === 'Enter') e.target.blur();
+        },
+      })),
+      customPaperHex,
+      onCustomPaperColorChange,
+      onCustomPaperTextCommit: e => {
+        const v = e.target.value.trim();
+        if (isValidHex(v)) this.setCustomPaperColor(v);
+      },
+      onCustomPaperTextKeyDown: e => {
+        if (e.key === 'Enter') e.target.blur();
+      },
+      showCustomizePanel: s.showCustomizePanel,
+      toggleCustomizePanel: e => this.toggleCustomizePanel(e),
+
+      statuses: s.statuses,
+      statusColumns,
+      visibleStatusColumns,
+      groupTabs,
+      isMobile,
+      isDesktop,
+      pagePad,
+      spineWidth,
+      titleFontSize,
+      showMobileMenu: s.showMobileMenu,
+      toggleMobileMenu: () => this.toggleMobileMenu(),
+      isEmpty: totalAll === 0,
+      sideTabs,
+      combinedTab,
+      sideOptions,
+
+      toolbarTags,
+      openNewTagModal: () => this.openNewTagModal(),
+      addStatus: () => this.addStatus(),
+
+      toggleFiltersPanel: () => this.toggleFiltersPanel(),
+      toggleExportMenu: () => this.toggleExportMenu(),
+      exportJSON: () => this.exportJSON(),
+      exportCSV: () => this.exportCSV(),
+      triggerImport: () => this.triggerImport(),
+      handleImportFile: e => this.handleImportFile(e),
+      fileInputRef: this.fileInputRef,
+      filtersButtonBg: s.ui.showFilters ? accent1 : 'oklch(98.5% 0.015 85)',
+      filtersButtonColor: s.ui.showFilters ? 'oklch(98% 0.005 80)' : 'oklch(30% 0.02 80)',
+      filtersBadgeText: filtersActive ? ' •' : '',
+
+      ui: s.ui,
+      statusFilterChips,
+      tagFilterChips,
+      toggleOnlyChildren: () => this.toggleOnlyChildren(),
+      toggleOnlyMinors: () => this.toggleOnlyMinors(),
+      childFilterBg: filters.onlyChildren ? 'oklch(70% 0.2 45 / 0.35)' : 'transparent',
+      minorFilterBg: filters.onlyMinors ? 'oklch(68% 0.22 264 / 0.35)' : 'transparent',
+      resetFilters: () => this.resetFilters(),
+
+      totalVisible,
+      totalSubText: filtersActive ? `(of ${totalAll})` : '',
+      adultsVisible,
+      childrenVisible,
+      minorsVisible,
+      filtersActive,
+
+      clearDrag: () => this.clearDrag(),
+      closeAllMenus: () => this.closeAllMenus(),
+      stopProp: e => e.stopPropagation(),
+
+      openAddModal: () => this.openAddModal(),
+      closeAddModal: () => this.closeAddModal(),
+      submitPaste: () => this.submitPaste(),
+      pasteStatusValue: s.ui.pasteTargetStatusId || (s.statuses[0] ? s.statuses[0].id : ''),
+      onPasteStatusChange: e => this.setState(st => ({ ui: { ...st.ui, pasteTargetStatusId: e.target.value } })),
+      onPasteTagChange: e => this.setState(st => ({ ui: { ...st.ui, pasteTargetTagId: e.target.value } })),
+      onPasteTextChange: e => this.setState(st => ({ ui: { ...st.ui, pasteText: e.target.value } })),
+      onPasteWithPlusOneChange: e => this.setState(st => ({ ui: { ...st.ui, pasteWithPlusOne: e.target.checked } })),
+      onPasteSideChange: e => this.setState(st => ({ ui: { ...st.ui, pasteTargetSideId: e.target.value } })),
+      pasteSideValue:
+        s.ui.pasteTargetSideId || (s.activeSideView !== 'combined' ? s.activeSideView : s.sides[0] ? s.sides[0].id : ''),
+      tagOptions,
+
+      openFamilyModal: () => this.openFamilyModal(),
+      closeFamilyModal: () => this.closeFamilyModal(),
+      submitFamily: () => this.submitFamily(),
+      addFamilyChildField: () => this.addFamilyChildField(),
+      familyChildRows,
+      familyStatusValue,
+      familySideValue,
+      familyPaletteSwatches,
+      onFamilyNameChange: e => this.setState(st => ({ ui: { ...st.ui, familyName: e.target.value } })),
+      onFamilyAdult1Change: e => this.setState(st => ({ ui: { ...st.ui, familyAdult1: e.target.value } })),
+      onFamilyAdult2Change: e => this.setState(st => ({ ui: { ...st.ui, familyAdult2: e.target.value } })),
+      onFamilyStatusChange: e => this.setState(st => ({ ui: { ...st.ui, familyStatusId: e.target.value } })),
+      onFamilySideChange: e => this.setState(st => ({ ui: { ...st.ui, familySideId: e.target.value } })),
+
+      tagModalTitle: s.ui.editingTagId ? 'Edit Family Tag' : 'New Family Tag',
+      closeTagModal: () => this.closeTagModal(),
+      saveTag: () => this.saveTag(),
+      deleteTag: () => this.deleteTag(),
+      onNewTagNameChange: e => this.setState(st => ({ ui: { ...st.ui, newTagName: e.target.value } })),
+      paletteSwatches,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
